@@ -5,7 +5,7 @@ Frobotics 4150 vision code for 2022
 
 This was copied from DariusAC 2020 vision code (which has the 2022 vision code)
 
-## To install the compiler on windows do the following:
+### To install the compiler on windows do the following:
 
 1) Download the zip file from:
 	https://github.com/wpilibsuite/raspbian-toolchain/releases
@@ -17,7 +17,7 @@ This was copied from DariusAC 2020 vision code (which has the 2022 vision code)
 an option to Edit the system environment variables (in Control Panel). Edit 
 the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited list).
 
-##To compile
+### To compile
 
 1) After performing the install -- open a windows command prompt.
 
@@ -26,7 +26,7 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 3) Issue the command:
 	make build
 
-## To remove existing compiled versions (to force a new compile)
+### To remove existing compiled versions (to force a new compile)
 
 1) Open a windows command prompt.
 
