@@ -36,7 +36,7 @@ void FetchVisionNetworkTable() {
 
 }
 // Outputs values from algorithm (runs every tick)
-void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double avgHeight, double stripeCount, double heightDiff, double xOffsetPx ) {
+void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double avgHeight, double stripeCount, double heightDiff, double xOffsetPx) {
 	outputEntries[0].SetDouble(avgX);
 	outputEntries[1].SetDouble(avgY);
 	outputEntries[2].SetDouble(avgWidth);

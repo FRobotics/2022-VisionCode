@@ -44,7 +44,7 @@ nt::NetworkTableEntry outputEntries[9];
 1 : Average Y
 2 : Average Width
 3 : Average Height
-4 : Distance  ---- now Y offset....
+4 : Distance
 5 : Stripe Count
 6: Height difference between highest and lowest strip
 7: X offset in px from center of highest strip
