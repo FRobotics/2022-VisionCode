@@ -9,6 +9,7 @@
 /vision/angleScore - The score for the target based on how rotated it is
 /vision/ratioScore - The score for the target based on its aspect ratio
 /vision/score - The composite score used to determine whether it is a target or not
+/vision/found - boolean indicating a target was found.
 ============================== TARGET DATA ==========================
 /vision/data/RotatedRectX - X Position in pixels of the target box center
 /vision/data/RotatedRectY - Y Position in pixels of the target box center

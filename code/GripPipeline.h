@@ -44,12 +44,13 @@ nt::NetworkTableEntry outputEntries[9];
 1 : Average Y
 2 : Average Width
 3 : Average Height
-4 : Distance
+4 : Distance --- changed to Y offset in pixels from center of screen.
 5 : Stripe Count
 6: Height difference between highest and lowest strip
 7: X offset in px from center of highest strip
 8: Watchdog
  */
+nt::NetworkTableEntry outputFound;
 
 
 void CorrectRect(cv::RotatedRect &rect);

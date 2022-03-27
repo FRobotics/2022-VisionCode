@@ -358,6 +358,8 @@ int main(int argc, char* argv[]) {
       grip::outputEntries[6] = ntinst.GetEntry("/vision/watchdog");
       grip::outputEntries[7] = ntinst.GetEntry("/vision/stripHeightDiff");
       grip::outputEntries[8] = ntinst.GetEntry("/vision/stripXOffset");
+      grip::outputFound = ntinst.GetEntry("/vision/found");		
+     
 
       grip::filterEntries[0] = ntinst.GetEntry("/vision/filterHeight");
       grip::filterEntries[1] = ntinst.GetEntry("/vision/deviationThreshold");
