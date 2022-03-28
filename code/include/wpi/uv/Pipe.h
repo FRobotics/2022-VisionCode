@@ -10,8 +10,8 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <string_view>
 
+#include "wpi/Twine.h"
 #include "wpi/uv/NetworkStream.h"
 
 namespace wpi::uv {
@@ -119,7 +119,7 @@ class Pipe final : public NetworkStreamImpl<Pipe, uv_pipe_t> {
    *
    * @param name File path (Unix) or name (Windows).
    */
-  void Bind(std::string_view name);
+  void Bind(const Twine& name);
 
   /**
    * Connect to the Unix domain socket or the named pipe.
@@ -135,8 +135,7 @@ class Pipe final : public NetworkStreamImpl<Pipe, uv_pipe_t> {
    * @param name File path (Unix) or name (Windows).
    * @param req connection request
    */
-  void Connect(std::string_view name,
-               const std::shared_ptr<PipeConnectReq>& req);
+  void Connect(const Twine& name, const std::shared_ptr<PipeConnectReq>& req);
 
   /**
    * Connect to the Unix domain socket or the named pipe.
@@ -150,7 +149,7 @@ class Pipe final : public NetworkStreamImpl<Pipe, uv_pipe_t> {
    * @param name File path (Unix) or name (Windows).
    * @param callback Callback function to call when connection established
    */
-  void Connect(std::string_view name, std::function<void()> callback);
+  void Connect(const Twine& name, std::function<void()> callback);
 
   /**
    * Get the name of the Unix domain socket or the named pipe.

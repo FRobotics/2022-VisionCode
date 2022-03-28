@@ -6,7 +6,8 @@
 #define WPIUTIL_WPI_DEMANGLE_H_
 
 #include <string>
-#include <string_view>
+
+#include "wpi/Twine.h"
 
 namespace wpi {
 
@@ -16,7 +17,7 @@ namespace wpi {
  * @param mangledSymbol the mangled symbol.
  * @return The demangled symbol, or mangledSymbol if demangling fails.
  */
-std::string Demangle(std::string_view mangledSymbol);
+std::string Demangle(const Twine& mangledSymbol);
 
 }  // namespace wpi
 

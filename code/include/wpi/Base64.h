@@ -7,41 +7,26 @@
 
 #include <cstddef>
 #include <string>
-#include <string_view>
-#include <vector>
 
-#include "wpi/span.h"
+#include "wpi/StringRef.h"
 
 namespace wpi {
 template <typename T>
 class SmallVectorImpl;
 class raw_ostream;
 
-size_t Base64Decode(raw_ostream& os, std::string_view encoded);
+size_t Base64Decode(raw_ostream& os, StringRef encoded);
 
-size_t Base64Decode(std::string_view encoded, std::string* plain);
+size_t Base64Decode(StringRef encoded, std::string* plain);
 
-std::string_view Base64Decode(std::string_view encoded, size_t* num_read,
-                              SmallVectorImpl<char>& buf);
+StringRef Base64Decode(StringRef encoded, size_t* num_read,
+                       SmallVectorImpl<char>& buf);
 
-size_t Base64Decode(std::string_view encoded, std::vector<uint8_t>* plain);
+void Base64Encode(raw_ostream& os, StringRef plain);
 
-span<uint8_t> Base64Decode(std::string_view encoded, size_t* num_read,
-                           SmallVectorImpl<uint8_t>& buf);
+void Base64Encode(StringRef plain, std::string* encoded);
 
-void Base64Encode(raw_ostream& os, std::string_view plain);
-
-void Base64Encode(std::string_view plain, std::string* encoded);
-
-std::string_view Base64Encode(std::string_view plain,
-                              SmallVectorImpl<char>& buf);
-
-void Base64Encode(raw_ostream& os, span<const uint8_t> plain);
-
-void Base64Encode(span<const uint8_t> plain, std::string* encoded);
-
-std::string_view Base64Encode(span<const uint8_t> plain,
-                              SmallVectorImpl<char>& buf);
+StringRef Base64Encode(StringRef plain, SmallVectorImpl<char>& buf);
 
 }  // namespace wpi
 

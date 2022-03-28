@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
+#include <units/angle.h>
+#include <units/velocity.h>
 
 #include "frc/controller/PIDController.h"
 #include "frc/controller/ProfiledPIDController.h"
@@ -12,16 +13,14 @@
 #include "frc/geometry/Rotation2d.h"
 #include "frc/kinematics/ChassisSpeeds.h"
 #include "frc/trajectory/Trajectory.h"
-#include "units/angle.h"
-#include "units/velocity.h"
 
 namespace frc {
 /**
  * This holonomic drive controller can be used to follow trajectories using a
- * holonomic drivetrain (i.e. swerve or mecanum). Holonomic trajectory following
- * is a much simpler problem to solve compared to skid-steer style drivetrains
- * because it is possible to individually control forward, sideways, and angular
- * velocity.
+ * holonomic drive train (i.e. swerve or mecanum). Holonomic trajectory
+ * following is a much simpler problem to solve compared to skid-steer style
+ * drivetrains because it is possible to individually control forward, sideways,
+ * and angular velocity.
  *
  * The holonomic drive controller takes in one PID controller for each
  * direction, forward and sideways, and one profiled PID controller for the
@@ -29,7 +28,7 @@ namespace frc {
  * translations, users can specify a custom heading that the drivetrain should
  * point toward. This heading reference is profiled for smoothness.
  */
-class WPILIB_DLLEXPORT HolonomicDriveController {
+class HolonomicDriveController {
  public:
   /**
    * Constructs a holonomic drive controller.
@@ -54,7 +53,7 @@ class WPILIB_DLLEXPORT HolonomicDriveController {
    * Sets the pose error which is considered tolerable for use with
    * AtReference().
    *
-   * @param tolerance Pose error which is tolerable.
+   * @param poseTolerance Pose error which is tolerable.
    */
   void SetTolerance(const Pose2d& tolerance);
 

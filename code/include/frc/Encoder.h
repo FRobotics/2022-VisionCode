@@ -7,17 +7,19 @@
 #include <memory>
 
 #include <hal/Types.h>
-#include <wpi/deprecated.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
 #include "frc/Counter.h"
 #include "frc/CounterBase.h"
+#include "frc/ErrorBase.h"
+#include "frc/PIDSource.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 
 class DigitalSource;
 class DigitalGlitchFilter;
+class SendableBuilder;
 class DMA;
 class DMASample;
 
@@ -36,9 +38,11 @@ class DMASample;
  * All encoders will immediately start counting - Reset() them if you need them
  * to be zeroed before use.
  */
-class Encoder : public CounterBase,
-                public wpi::Sendable,
-                public wpi::SendableHelper<Encoder> {
+class Encoder : public ErrorBase,
+                public CounterBase,
+                public PIDSource,
+                public Sendable,
+                public SendableHelper<Encoder> {
   friend class DMA;
   friend class DMASample;
 
@@ -167,7 +171,7 @@ class Encoder : public CounterBase,
    *
    * @return Period in seconds of the most recent pulse.
    */
-  units::second_t GetPeriod() const override;
+  double GetPeriod() const override;
 
   /**
    * Sets the maximum period for stopped detection.
@@ -188,7 +192,7 @@ class Encoder : public CounterBase,
   WPI_DEPRECATED(
       "Use SetMinRate() in favor of this method.  This takes unscaled periods "
       "and SetMinRate() scales using value from SetDistancePerPulse().")
-  void SetMaxPeriod(units::second_t maxPeriod) override;
+  void SetMaxPeriod(double maxPeriod) override;
 
   /**
    * Determine if the encoder is stopped.
@@ -310,6 +314,8 @@ class Encoder : public CounterBase,
    */
   int GetSamplesToAverage() const;
 
+  double PIDGet() override;
+
   /**
    * Set the index source for the encoder.
    *
@@ -325,8 +331,8 @@ class Encoder : public CounterBase,
    *
    * When this source is activated, the encoder count automatically resets.
    *
-   * @param source A digital source to set as the encoder index
-   * @param type   The state that will cause the encoder to reset
+   * @param channel A digital source to set as the encoder index
+   * @param type    The state that will cause the encoder to reset
    */
   void SetIndexSource(const DigitalSource& source,
                       IndexingType type = kResetOnRisingEdge);
@@ -340,7 +346,7 @@ class Encoder : public CounterBase,
 
   int GetFPGAIndex() const;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   /**

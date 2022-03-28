@@ -101,6 +101,6 @@ class RpcCall final {
 
 }  // namespace nt
 
-#include "networktables/RpcCall.inc"
+#include "networktables/RpcCall.inl"
 
 #endif  // NTCORE_NETWORKTABLES_RPCCALL_H_

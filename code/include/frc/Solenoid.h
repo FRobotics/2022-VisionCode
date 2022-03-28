@@ -4,43 +4,40 @@
 
 #pragma once
 
-#include <memory>
-
 #include <hal/Types.h>
-#include <units/time.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
-#include "frc/PneumaticsBase.h"
-#include "frc/PneumaticsModuleType.h"
+#include "frc/SolenoidBase.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 
+class SendableBuilder;
+
 /**
- * Solenoid class for running high voltage Digital Output on a pneumatics
- * module.
+ * Solenoid class for running high voltage Digital Output (PCM).
  *
  * The Solenoid class is typically used for pneumatics solenoids, but could be
- * used for any device within the current spec of the module.
+ * used for any device within the current spec of the PCM.
  */
-class Solenoid : public wpi::Sendable, public wpi::SendableHelper<Solenoid> {
+class Solenoid : public SolenoidBase,
+                 public Sendable,
+                 public SendableHelper<Solenoid> {
  public:
   /**
-   * Constructs a solenoid for a specified module and type.
+   * Constructor using the default PCM ID (0).
    *
-   * @param module The module ID to use.
-   * @param moduleType The module type to use.
-   * @param channel The channel the solenoid is on.
+   * @param channel The channel on the PCM to control (0..7).
    */
-  Solenoid(int module, PneumaticsModuleType moduleType, int channel);
+  explicit Solenoid(int channel);
 
   /**
-   * Constructs a solenoid for a default module and specified type.
+   * Constructor.
    *
-   * @param moduleType The module type to use.
-   * @param channel The channel the solenoid is on.
+   * @param moduleNumber The CAN ID of the PCM the solenoid is attached to
+   * @param channel      The channel on the PCM to control (0..7).
    */
-  Solenoid(PneumaticsModuleType moduleType, int channel);
+  Solenoid(int moduleNumber, int channel);
 
   ~Solenoid() override;
 
@@ -75,42 +72,42 @@ class Solenoid : public wpi::Sendable, public wpi::SendableHelper<Solenoid> {
   int GetChannel() const;
 
   /**
-   * Check if solenoid is Disabled.
+   * Check if solenoid is blacklisted.
    *
-   * If a solenoid is shorted, it is added to the DisabledList and
+   * If a solenoid is shorted, it is added to the blacklist and
    * disabled until power cycle, or until faults are cleared.
    *
    * @see ClearAllPCMStickyFaults()
    *
    * @return If solenoid is disabled due to short.
    */
-  bool IsDisabled() const;
+  bool IsBlackListed() const;
 
   /**
    * Set the pulse duration in the PCM. This is used in conjunction with
    * the startPulse method to allow the PCM to control the timing of a pulse.
    * The timing can be controlled in 0.01 second increments.
    *
-   * @param duration The duration of the pulse, from 0.01 to 2.55 seconds.
+   * @param durationSeconds The duration of the pulse, from 0.01 to 2.55
+   *                        seconds.
    *
    * @see startPulse()
    */
-  void SetPulseDuration(units::second_t duration);
+  void SetPulseDuration(double durationSeconds);
 
   /**
-   * %Trigger the PCM to generate a pulse of the duration set in
+   * Trigger the PCM to generate a pulse of the duration set in
    * setPulseDuration.
    *
    * @see setPulseDuration()
    */
   void StartPulse();
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
-  std::shared_ptr<PneumaticsBase> m_module;
-  int m_mask;
-  int m_channel;
+  hal::Handle<HAL_SolenoidHandle> m_solenoidHandle;
+  int m_channel;  // The channel on the module to control
 };
 
 }  // namespace frc

@@ -5,16 +5,15 @@
 #pragma once
 
 #include <units/voltage.h>
-#include <wpi/deprecated.h>
+
+#include "frc/PIDOutput.h"
 
 namespace frc {
 
 /**
  * Interface for speed controlling devices.
- *
- * @deprecated Use MotorController.
  */
-class WPI_DEPRECATED("use MotorController") SpeedController {
+class SpeedController : public PIDOutput {
  public:
   virtual ~SpeedController() = default;
 

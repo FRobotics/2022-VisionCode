@@ -20,17 +20,17 @@ class Color {
    */
 
   /**
-   * 0x1560BD.
+   * #1560BD.
    */
   static const Color kDenim;
 
   /**
-   * 0x0066B3.
+   * #0066B3.
    */
   static const Color kFirstBlue;
 
   /**
-   * 0xED1C24.
+   * #ED1C24.
    */
   static const Color kFirstRed;
 
@@ -39,702 +39,702 @@ class Color {
    */
 
   /**
-   * 0xF0F8FF.
+   * #F0F8FF.
    */
   static const Color kAliceBlue;
 
   /**
-   * 0xFAEBD7.
+   * #FAEBD7.
    */
   static const Color kAntiqueWhite;
 
   /**
-   * 0x00FFFF.
+   * #00FFFF.
    */
   static const Color kAqua;
 
   /**
-   * 0x7FFFD4.
+   * #7FFFD4.
    */
   static const Color kAquamarine;
 
   /**
-   * 0xF0FFFF.
+   * #F0FFFF.
    */
   static const Color kAzure;
 
   /**
-   * 0xF5F5DC.
+   * #F5F5DC.
    */
   static const Color kBeige;
 
   /**
-   * 0xFFE4C4.
+   * #FFE4C4.
    */
   static const Color kBisque;
 
   /**
-   * 0x000000.
+   * #000000.
    */
   static const Color kBlack;
 
   /**
-   * 0xFFEBCD.
+   * #FFEBCD.
    */
   static const Color kBlanchedAlmond;
 
   /**
-   * 0x0000FF.
+   * #0000FF.
    */
   static const Color kBlue;
 
   /**
-   * 0x8A2BE2.
+   * #8A2BE2.
    */
   static const Color kBlueViolet;
 
   /**
-   * 0xA52A2A.
+   * #A52A2A.
    */
   static const Color kBrown;
 
   /**
-   * 0xDEB887.
+   * #DEB887.
    */
   static const Color kBurlywood;
 
   /**
-   * 0x5F9EA0.
+   * #5F9EA0.
    */
   static const Color kCadetBlue;
 
   /**
-   * 0x7FFF00.
+   * #7FFF00.
    */
   static const Color kChartreuse;
 
   /**
-   * 0xD2691E.
+   * #D2691E.
    */
   static const Color kChocolate;
 
   /**
-   * 0xFF7F50.
+   * #FF7F50.
    */
   static const Color kCoral;
 
   /**
-   * 0x6495ED.
+   * #6495ED.
    */
   static const Color kCornflowerBlue;
 
   /**
-   * 0xFFF8DC.
+   * #FFF8DC.
    */
   static const Color kCornsilk;
 
   /**
-   * 0xDC143C.
+   * #DC143C.
    */
   static const Color kCrimson;
 
   /**
-   * 0x00FFFF.
+   * #00FFFF.
    */
   static const Color kCyan;
 
   /**
-   * 0x00008B.
+   * #00008B.
    */
   static const Color kDarkBlue;
 
   /**
-   * 0x008B8B.
+   * #008B8B.
    */
   static const Color kDarkCyan;
 
   /**
-   * 0xB8860B.
+   * #B8860B.
    */
   static const Color kDarkGoldenrod;
 
   /**
-   * 0xA9A9A9.
+   * #A9A9A9.
    */
   static const Color kDarkGray;
 
   /**
-   * 0x006400.
+   * #006400.
    */
   static const Color kDarkGreen;
 
   /**
-   * 0xBDB76B.
+   * #BDB76B.
    */
   static const Color kDarkKhaki;
 
   /**
-   * 0x8B008B.
+   * #8B008B.
    */
   static const Color kDarkMagenta;
 
   /**
-   * 0x556B2F.
+   * #556B2F.
    */
   static const Color kDarkOliveGreen;
 
   /**
-   * 0xFF8C00.
+   * #FF8C00.
    */
   static const Color kDarkOrange;
 
   /**
-   * 0x9932CC.
+   * #9932CC.
    */
   static const Color kDarkOrchid;
 
   /**
-   * 0x8B0000.
+   * #8B0000.
    */
   static const Color kDarkRed;
 
   /**
-   * 0xE9967A.
+   * #E9967A.
    */
   static const Color kDarkSalmon;
 
   /**
-   * 0x8FBC8F.
+   * #8FBC8F.
    */
   static const Color kDarkSeaGreen;
 
   /**
-   * 0x483D8B.
+   * #483D8B.
    */
   static const Color kDarkSlateBlue;
 
   /**
-   * 0x2F4F4F.
+   * #2F4F4F.
    */
   static const Color kDarkSlateGray;
 
   /**
-   * 0x00CED1.
+   * #00CED1.
    */
   static const Color kDarkTurquoise;
 
   /**
-   * 0x9400D3.
+   * #9400D3.
    */
   static const Color kDarkViolet;
 
   /**
-   * 0xFF1493.
+   * #FF1493.
    */
   static const Color kDeepPink;
 
   /**
-   * 0x00BFFF.
+   * #00BFFF.
    */
   static const Color kDeepSkyBlue;
 
   /**
-   * 0x696969.
+   * #696969.
    */
   static const Color kDimGray;
 
   /**
-   * 0x1E90FF.
+   * #1E90FF.
    */
   static const Color kDodgerBlue;
 
   /**
-   * 0xB22222.
+   * #B22222.
    */
   static const Color kFirebrick;
 
   /**
-   * 0xFFFAF0.
+   * #FFFAF0.
    */
   static const Color kFloralWhite;
 
   /**
-   * 0x228B22.
+   * #228B22.
    */
   static const Color kForestGreen;
 
   /**
-   * 0xFF00FF.
+   * #FF00FF.
    */
   static const Color kFuchsia;
 
   /**
-   * 0xDCDCDC.
+   * #DCDCDC.
    */
   static const Color kGainsboro;
 
   /**
-   * 0xF8F8FF.
+   * #F8F8FF.
    */
   static const Color kGhostWhite;
 
   /**
-   * 0xFFD700.
+   * #FFD700.
    */
   static const Color kGold;
 
   /**
-   * 0xDAA520.
+   * #DAA520.
    */
   static const Color kGoldenrod;
 
   /**
-   * 0x808080.
+   * #808080.
    */
   static const Color kGray;
 
   /**
-   * 0x008000.
+   * #008000.
    */
   static const Color kGreen;
 
   /**
-   * 0xADFF2F.
+   * #ADFF2F.
    */
   static const Color kGreenYellow;
 
   /**
-   * 0xF0FFF0.
+   * #F0FFF0.
    */
   static const Color kHoneydew;
 
   /**
-   * 0xFF69B4.
+   * #FF69B4.
    */
   static const Color kHotPink;
 
   /**
-   * 0xCD5C5C.
+   * #CD5C5C.
    */
   static const Color kIndianRed;
 
   /**
-   * 0x4B0082.
+   * #4B0082.
    */
   static const Color kIndigo;
 
   /**
-   * 0xFFFFF0.
+   * #FFFFF0.
    */
   static const Color kIvory;
 
   /**
-   * 0xF0E68C.
+   * #F0E68C.
    */
   static const Color kKhaki;
 
   /**
-   * 0xE6E6FA.
+   * #E6E6FA.
    */
   static const Color kLavender;
 
   /**
-   * 0xFFF0F5.
+   * #FFF0F5.
    */
   static const Color kLavenderBlush;
 
   /**
-   * 0x7CFC00.
+   * #7CFC00.
    */
   static const Color kLawnGreen;
 
   /**
-   * 0xFFFACD.
+   * #FFFACD.
    */
   static const Color kLemonChiffon;
 
   /**
-   * 0xADD8E6.
+   * #ADD8E6.
    */
   static const Color kLightBlue;
 
   /**
-   * 0xF08080.
+   * #F08080.
    */
   static const Color kLightCoral;
 
   /**
-   * 0xE0FFFF.
+   * #E0FFFF.
    */
   static const Color kLightCyan;
 
   /**
-   * 0xFAFAD2.
+   * #FAFAD2.
    */
   static const Color kLightGoldenrodYellow;
 
   /**
-   * 0xD3D3D3.
+   * #D3D3D3.
    */
   static const Color kLightGray;
 
   /**
-   * 0x90EE90.
+   * #90EE90.
    */
   static const Color kLightGreen;
 
   /**
-   * 0xFFB6C1.
+   * #FFB6C1.
    */
   static const Color kLightPink;
 
   /**
-   * 0xFFA07A.
+   * #FFA07A.
    */
   static const Color kLightSalmon;
 
   /**
-   * 0x20B2AA.
+   * #20B2AA.
    */
   static const Color kLightSeaGreen;
 
   /**
-   * 0x87CEFA.
+   * #87CEFA.
    */
   static const Color kLightSkyBlue;
 
   /**
-   * 0x778899.
+   * #778899.
    */
   static const Color kLightSlateGray;
 
   /**
-   * 0xB0C4DE.
+   * #B0C4DE.
    */
   static const Color kLightSteelBlue;
 
   /**
-   * 0xFFFFE0.
+   * #FFFFE0.
    */
   static const Color kLightYellow;
 
   /**
-   * 0x00FF00.
+   * #00FF00.
    */
   static const Color kLime;
 
   /**
-   * 0x32CD32.
+   * #32CD32.
    */
   static const Color kLimeGreen;
 
   /**
-   * 0xFAF0E6.
+   * #FAF0E6.
    */
   static const Color kLinen;
 
   /**
-   * 0xFF00FF.
+   * #FF00FF.
    */
   static const Color kMagenta;
 
   /**
-   * 0x800000.
+   * #800000.
    */
   static const Color kMaroon;
 
   /**
-   * 0x66CDAA.
+   * #66CDAA.
    */
   static const Color kMediumAquamarine;
 
   /**
-   * 0x0000CD.
+   * #0000CD.
    */
   static const Color kMediumBlue;
 
   /**
-   * 0xBA55D3.
+   * #BA55D3.
    */
   static const Color kMediumOrchid;
 
   /**
-   * 0x9370DB.
+   * #9370DB.
    */
   static const Color kMediumPurple;
 
   /**
-   * 0x3CB371.
+   * #3CB371.
    */
   static const Color kMediumSeaGreen;
 
   /**
-   * 0x7B68EE.
+   * #7B68EE.
    */
   static const Color kMediumSlateBlue;
 
   /**
-   * 0x00FA9A.
+   * #00FA9A.
    */
   static const Color kMediumSpringGreen;
 
   /**
-   * 0x48D1CC.
+   * #48D1CC.
    */
   static const Color kMediumTurquoise;
 
   /**
-   * 0xC71585.
+   * #C71585.
    */
   static const Color kMediumVioletRed;
 
   /**
-   * 0x191970.
+   * #191970.
    */
   static const Color kMidnightBlue;
 
   /**
-   * 0xF5FFFA.
+   * #F5FFFA.
    */
   static const Color kMintcream;
 
   /**
-   * 0xFFE4E1.
+   * #FFE4E1.
    */
   static const Color kMistyRose;
 
   /**
-   * 0xFFE4B5.
+   * #FFE4B5.
    */
   static const Color kMoccasin;
 
   /**
-   * 0xFFDEAD.
+   * #FFDEAD.
    */
   static const Color kNavajoWhite;
 
   /**
-   * 0x000080.
+   * #000080.
    */
   static const Color kNavy;
 
   /**
-   * 0xFDF5E6.
+   * #FDF5E6.
    */
   static const Color kOldLace;
 
   /**
-   * 0x808000.
+   * #808000.
    */
   static const Color kOlive;
 
   /**
-   * 0x6B8E23.
+   * #6B8E23.
    */
   static const Color kOliveDrab;
 
   /**
-   * 0xFFA500.
+   * #FFA500.
    */
   static const Color kOrange;
 
   /**
-   * 0xFF4500.
+   * #FF4500.
    */
   static const Color kOrangeRed;
 
   /**
-   * 0xDA70D6.
+   * #DA70D6.
    */
   static const Color kOrchid;
 
   /**
-   * 0xEEE8AA.
+   * #EEE8AA.
    */
   static const Color kPaleGoldenrod;
 
   /**
-   * 0x98FB98.
+   * #98FB98.
    */
   static const Color kPaleGreen;
 
   /**
-   * 0xAFEEEE.
+   * #AFEEEE.
    */
   static const Color kPaleTurquoise;
 
   /**
-   * 0xDB7093.
+   * #DB7093.
    */
   static const Color kPaleVioletRed;
 
   /**
-   * 0xFFEFD5.
+   * #FFEFD5.
    */
   static const Color kPapayaWhip;
 
   /**
-   * 0xFFDAB9.
+   * #FFDAB9.
    */
   static const Color kPeachPuff;
 
   /**
-   * 0xCD853F.
+   * #CD853F.
    */
   static const Color kPeru;
 
   /**
-   * 0xFFC0CB.
+   * #FFC0CB.
    */
   static const Color kPink;
 
   /**
-   * 0xDDA0DD.
+   * #DDA0DD.
    */
   static const Color kPlum;
 
   /**
-   * 0xB0E0E6.
+   * #B0E0E6.
    */
   static const Color kPowderBlue;
 
   /**
-   * 0x800080.
+   * #800080.
    */
   static const Color kPurple;
 
   /**
-   * 0xFF0000.
+   * #FF0000.
    */
   static const Color kRed;
 
   /**
-   * 0xBC8F8F.
+   * #BC8F8F.
    */
   static const Color kRosyBrown;
 
   /**
-   * 0x4169E1.
+   * #4169E1.
    */
   static const Color kRoyalBlue;
 
   /**
-   * 0x8B4513.
+   * #8B4513.
    */
   static const Color kSaddleBrown;
 
   /**
-   * 0xFA8072.
+   * #FA8072.
    */
   static const Color kSalmon;
 
   /**
-   * 0xF4A460.
+   * #F4A460.
    */
   static const Color kSandyBrown;
 
   /**
-   * 0x2E8B57.
+   * #2E8B57.
    */
   static const Color kSeaGreen;
 
   /**
-   * 0xFFF5EE.
+   * #FFF5EE.
    */
   static const Color kSeashell;
 
   /**
-   * 0xA0522D.
+   * #A0522D.
    */
   static const Color kSienna;
 
   /**
-   * 0xC0C0C0.
+   * #C0C0C0.
    */
   static const Color kSilver;
 
   /**
-   * 0x87CEEB.
+   * #87CEEB.
    */
   static const Color kSkyBlue;
 
   /**
-   * 0x6A5ACD.
+   * #6A5ACD.
    */
   static const Color kSlateBlue;
 
   /**
-   * 0x708090.
+   * #708090.
    */
   static const Color kSlateGray;
 
   /**
-   * 0xFFFAFA.
+   * #FFFAFA.
    */
   static const Color kSnow;
 
   /**
-   * 0x00FF7F.
+   * #00FF7F.
    */
   static const Color kSpringGreen;
 
   /**
-   * 0x4682B4.
+   * #4682B4.
    */
   static const Color kSteelBlue;
 
   /**
-   * 0xD2B48C.
+   * #D2B48C.
    */
   static const Color kTan;
 
   /**
-   * 0x008080.
+   * #008080.
    */
   static const Color kTeal;
 
   /**
-   * 0xD8BFD8.
+   * #D8BFD8.
    */
   static const Color kThistle;
 
   /**
-   * 0xFF6347.
+   * #FF6347.
    */
   static const Color kTomato;
 
   /**
-   * 0x40E0D0.
+   * #40E0D0.
    */
   static const Color kTurquoise;
 
   /**
-   * 0xEE82EE.
+   * #EE82EE.
    */
   static const Color kViolet;
 
   /**
-   * 0xF5DEB3.
+   * #F5DEB3.
    */
   static const Color kWheat;
 
   /**
-   * 0xFFFFFF.
+   * #FFFFFF.
    */
   static const Color kWhite;
 
   /**
-   * 0xF5F5F5.
+   * #F5F5F5.
    */
   static const Color kWhiteSmoke;
 
   /**
-   * 0xFFFF00.
+   * #FFFF00.
    */
   static const Color kYellow;
 
   /**
-   * 0x9ACD32.
+   * #9ACD32.
    */
   static const Color kYellowGreen;
 
@@ -743,9 +743,9 @@ class Color {
   /**
    * Constructs a Color.
    *
-   * @param r Red value (0-1)
-   * @param g Green value (0-1)
-   * @param b Blue value (0-1)
+   * @param red Red value (0-1)
+   * @param green Green value (0-1)
+   * @param blue Blue value (0-1)
    */
   constexpr Color(double r, double g, double b)
       : red(roundAndClamp(r)),

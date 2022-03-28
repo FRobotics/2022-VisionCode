@@ -6,23 +6,22 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableValue.h>
-#include <wpi/span.h>
 
-namespace wpi {
-class Sendable;
-}  // namespace wpi
+#include "frc/ErrorBase.h"
+#include "frc/smartdashboard/ListenerExecutor.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 
-class SmartDashboard {
+class SmartDashboard : public ErrorBase,
+                       public Sendable,
+                       public SendableHelper<SmartDashboard> {
  public:
-  SmartDashboard() = delete;
-
   static void init();
 
   /**
@@ -31,7 +30,7 @@ class SmartDashboard {
    * @param key the key to search for
    * @return true if the table as a value assigned to the given key
    */
-  static bool ContainsKey(std::string_view key);
+  static bool ContainsKey(wpi::StringRef key);
 
   /**
    * @param types bitmask of types; 0 is treated as a "don't care".
@@ -44,7 +43,7 @@ class SmartDashboard {
    *
    * @param key the key to make persistent
    */
-  static void SetPersistent(std::string_view key);
+  static void SetPersistent(wpi::StringRef key);
 
   /**
    * Stop making a key's value persistent through program restarts.
@@ -52,7 +51,7 @@ class SmartDashboard {
    *
    * @param key the key name
    */
-  static void ClearPersistent(std::string_view key);
+  static void ClearPersistent(wpi::StringRef key);
 
   /**
    * Returns whether the value is persistent through program restarts.
@@ -60,7 +59,7 @@ class SmartDashboard {
    *
    * @param key the key name
    */
-  static bool IsPersistent(std::string_view key);
+  static bool IsPersistent(wpi::StringRef key);
 
   /**
    * Sets flags on the specified key in this table. The key can
@@ -69,7 +68,7 @@ class SmartDashboard {
    * @param key the key name
    * @param flags the flags to set (bitmask)
    */
-  static void SetFlags(std::string_view key, unsigned int flags);
+  static void SetFlags(wpi::StringRef key, unsigned int flags);
 
   /**
    * Clears flags on the specified key in this table. The key can
@@ -78,7 +77,7 @@ class SmartDashboard {
    * @param key the key name
    * @param flags the flags to clear (bitmask)
    */
-  static void ClearFlags(std::string_view key, unsigned int flags);
+  static void ClearFlags(wpi::StringRef key, unsigned int flags);
 
   /**
    * Returns the flags for the specified key.
@@ -86,14 +85,14 @@ class SmartDashboard {
    * @param key the key name
    * @return the flags, or 0 if the key is not defined
    */
-  static unsigned int GetFlags(std::string_view key);
+  static unsigned int GetFlags(wpi::StringRef key);
 
   /**
    * Deletes the specified key in this table.
    *
    * @param key the key name
    */
-  static void Delete(std::string_view key);
+  static void Delete(wpi::StringRef key);
 
   /**
    * Returns an NT Entry mapping to the specified key
@@ -103,7 +102,7 @@ class SmartDashboard {
    * @param key the key
    * @return    the entry for the key
    */
-  static nt::NetworkTableEntry GetEntry(std::string_view key);
+  static nt::NetworkTableEntry GetEntry(wpi::StringRef key);
 
   /**
    * Maps the specified key to the specified value in this table.
@@ -114,10 +113,10 @@ class SmartDashboard {
    * In order for the value to appear in the dashboard, it must be registered
    * with SendableRegistry.  WPILib components do this automatically.
    *
-   * @param key  the key
-   * @param data the value
+   * @param keyName the key
+   * @param value   the value
    */
-  static void PutData(std::string_view key, wpi::Sendable* data);
+  static void PutData(wpi::StringRef key, Sendable* data);
 
   /**
    * Maps the specified key (where the key is the name of the Sendable)
@@ -131,7 +130,7 @@ class SmartDashboard {
    *
    * @param value the value
    */
-  static void PutData(wpi::Sendable* value);
+  static void PutData(Sendable* value);
 
   /**
    * Returns the value at the specified key.
@@ -139,7 +138,7 @@ class SmartDashboard {
    * @param keyName the key
    * @return the value
    */
-  static wpi::Sendable* GetData(std::string_view keyName);
+  static Sendable* GetData(wpi::StringRef keyName);
 
   /**
    * Maps the specified key to the specified value in this table.
@@ -151,7 +150,7 @@ class SmartDashboard {
    * @param value   the value
    * @return        False if the table key already exists with a different type
    */
-  static bool PutBoolean(std::string_view keyName, bool value);
+  static bool PutBoolean(wpi::StringRef keyName, bool value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -159,7 +158,7 @@ class SmartDashboard {
    * @param defaultValue the default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultBoolean(std::string_view key, bool defaultValue);
+  static bool SetDefaultBoolean(wpi::StringRef key, bool defaultValue);
 
   /**
    * Returns the value at the specified key.
@@ -167,10 +166,9 @@ class SmartDashboard {
    * If the key is not found, returns the default value.
    *
    * @param keyName the key
-   * @param defaultValue the default value to set if key doesn't exist
    * @return the value
    */
-  static bool GetBoolean(std::string_view keyName, bool defaultValue);
+  static bool GetBoolean(wpi::StringRef keyName, bool defaultValue);
 
   /**
    * Maps the specified key to the specified value in this table.
@@ -182,7 +180,7 @@ class SmartDashboard {
    * @param value   the value
    * @return        False if the table key already exists with a different type
    */
-  static bool PutNumber(std::string_view keyName, double value);
+  static bool PutNumber(wpi::StringRef keyName, double value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -191,7 +189,7 @@ class SmartDashboard {
    * @param defaultValue The default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultNumber(std::string_view key, double defaultValue);
+  static bool SetDefaultNumber(wpi::StringRef key, double defaultValue);
 
   /**
    * Returns the value at the specified key.
@@ -199,10 +197,9 @@ class SmartDashboard {
    * If the key is not found, returns the default value.
    *
    * @param keyName the key
-   * @param defaultValue the default value to set if the key doesn't exist
    * @return the value
    */
-  static double GetNumber(std::string_view keyName, double defaultValue);
+  static double GetNumber(wpi::StringRef keyName, double defaultValue);
 
   /**
    * Maps the specified key to the specified value in this table.
@@ -214,7 +211,7 @@ class SmartDashboard {
    * @param value   the value
    * @return        False if the table key already exists with a different type
    */
-  static bool PutString(std::string_view keyName, std::string_view value);
+  static bool PutString(wpi::StringRef keyName, wpi::StringRef value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -223,8 +220,7 @@ class SmartDashboard {
    * @param defaultValue the default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultString(std::string_view key,
-                               std::string_view defaultValue);
+  static bool SetDefaultString(wpi::StringRef key, wpi::StringRef defaultValue);
 
   /**
    * Returns the value at the specified key.
@@ -232,11 +228,10 @@ class SmartDashboard {
    * If the key is not found, returns the default value.
    *
    * @param keyName the key
-   * @param defaultValue the default value to set if the key doesn't exist
    * @return the value
    */
-  static std::string GetString(std::string_view keyName,
-                               std::string_view defaultValue);
+  static std::string GetString(wpi::StringRef keyName,
+                               wpi::StringRef defaultValue);
 
   /**
    * Put a boolean array in the table.
@@ -249,7 +244,7 @@ class SmartDashboard {
    *       std::vector<bool> is special-cased in C++. 0 is false, any
    *       non-zero value is true.
    */
-  static bool PutBooleanArray(std::string_view key, wpi::span<const int> value);
+  static bool PutBooleanArray(wpi::StringRef key, wpi::ArrayRef<int> value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -258,8 +253,8 @@ class SmartDashboard {
    * @param defaultValue the default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultBooleanArray(std::string_view key,
-                                     wpi::span<const int> defaultValue);
+  static bool SetDefaultBooleanArray(wpi::StringRef key,
+                                     wpi::ArrayRef<int> defaultValue);
 
   /**
    * Returns the boolean array the key maps to.
@@ -279,8 +274,8 @@ class SmartDashboard {
    *       because std::vector<bool> is special-cased in C++. 0 is false, any
    *       non-zero value is true.
    */
-  static std::vector<int> GetBooleanArray(std::string_view key,
-                                          wpi::span<const int> defaultValue);
+  static std::vector<int> GetBooleanArray(wpi::StringRef key,
+                                          wpi::ArrayRef<int> defaultValue);
 
   /**
    * Put a number array in the table.
@@ -289,8 +284,7 @@ class SmartDashboard {
    * @param value The value that will be assigned.
    * @return False if the table key already exists with a different type
    */
-  static bool PutNumberArray(std::string_view key,
-                             wpi::span<const double> value);
+  static bool PutNumberArray(wpi::StringRef key, wpi::ArrayRef<double> value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -299,8 +293,8 @@ class SmartDashboard {
    * @param defaultValue The default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultNumberArray(std::string_view key,
-                                    wpi::span<const double> defaultValue);
+  static bool SetDefaultNumberArray(wpi::StringRef key,
+                                    wpi::ArrayRef<double> defaultValue);
 
   /**
    * Returns the number array the key maps to.
@@ -316,8 +310,8 @@ class SmartDashboard {
    * @note This makes a copy of the array. If the overhead of this is a concern,
    *       use GetValue() instead.
    */
-  static std::vector<double> GetNumberArray(
-      std::string_view key, wpi::span<const double> defaultValue);
+  static std::vector<double> GetNumberArray(wpi::StringRef key,
+                                            wpi::ArrayRef<double> defaultValue);
 
   /**
    * Put a string array in the table.
@@ -326,8 +320,8 @@ class SmartDashboard {
    * @param value The value that will be assigned.
    * @return False if the table key already exists with a different type
    */
-  static bool PutStringArray(std::string_view key,
-                             wpi::span<const std::string> value);
+  static bool PutStringArray(wpi::StringRef key,
+                             wpi::ArrayRef<std::string> value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -336,8 +330,8 @@ class SmartDashboard {
    * @param defaultValue The default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultStringArray(std::string_view key,
-                                    wpi::span<const std::string> defaultValue);
+  static bool SetDefaultStringArray(wpi::StringRef key,
+                                    wpi::ArrayRef<std::string> defaultValue);
 
   /**
    * Returns the string array the key maps to.
@@ -354,7 +348,7 @@ class SmartDashboard {
    *       use GetValue() instead.
    */
   static std::vector<std::string> GetStringArray(
-      std::string_view key, wpi::span<const std::string> defaultValue);
+      wpi::StringRef key, wpi::ArrayRef<std::string> defaultValue);
 
   /**
    * Put a raw value (byte array) in the table.
@@ -363,7 +357,7 @@ class SmartDashboard {
    * @param value The value that will be assigned.
    * @return False if the table key already exists with a different type
    */
-  static bool PutRaw(std::string_view key, std::string_view value);
+  static bool PutRaw(wpi::StringRef key, wpi::StringRef value);
 
   /**
    * Gets the current value in the table, setting it if it does not exist.
@@ -372,8 +366,7 @@ class SmartDashboard {
    * @param defaultValue The default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultRaw(std::string_view key,
-                            std::string_view defaultValue);
+  static bool SetDefaultRaw(wpi::StringRef key, wpi::StringRef defaultValue);
 
   /**
    * Returns the raw value (byte array) the key maps to.
@@ -389,8 +382,7 @@ class SmartDashboard {
    * @note This makes a copy of the raw contents. If the overhead of this is a
    *       concern, use GetValue() instead.
    */
-  static std::string GetRaw(std::string_view key,
-                            std::string_view defaultValue);
+  static std::string GetRaw(wpi::StringRef key, wpi::StringRef defaultValue);
 
   /**
    * Maps the specified key to the specified complex value (such as an array) in
@@ -403,7 +395,7 @@ class SmartDashboard {
    * @param value   the value
    * @return        False if the table key already exists with a different type
    */
-  static bool PutValue(std::string_view keyName,
+  static bool PutValue(wpi::StringRef keyName,
                        std::shared_ptr<nt::Value> value);
 
   /**
@@ -413,7 +405,7 @@ class SmartDashboard {
    * @param defaultValue The default value to set if key doesn't exist.
    * @returns False if the table key exists with a different type
    */
-  static bool SetDefaultValue(std::string_view key,
+  static bool SetDefaultValue(wpi::StringRef key,
                               std::shared_ptr<nt::Value> defaultValue);
 
   /**
@@ -421,12 +413,14 @@ class SmartDashboard {
    * complex data object.
    *
    * @param keyName the key
+   * @param value   the object to retrieve the value into
    */
-  static std::shared_ptr<nt::Value> GetValue(std::string_view keyName);
+  static std::shared_ptr<nt::Value> GetValue(wpi::StringRef keyName);
 
   /**
    * Posts a task from a listener to the ListenerExecutor, so that it can be run
-   * synchronously from the main loop on the next call to updateValues().
+   * synchronously from the main loop on the next call to {@link
+   * SmartDashboard#updateValues()}.
    *
    * @param task The task to run synchronously from the main thread.
    */
@@ -436,6 +430,11 @@ class SmartDashboard {
    * Puts all sendable data to the dashboard.
    */
   static void UpdateValues();
+
+ private:
+  ~SmartDashboard() override = default;
+
+  static detail::ListenerExecutor listenerExecutor;
 };
 
 }  // namespace frc

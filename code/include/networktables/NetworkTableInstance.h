@@ -8,11 +8,12 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
-#include <wpi/span.h>
+#include <wpi/ArrayRef.h>
+#include <wpi/StringRef.h>
+#include <wpi/Twine.h>
 
 #include "networktables/NetworkTable.h"
 #include "networktables/NetworkTableEntry.h"
@@ -20,6 +21,10 @@
 #include "ntcore_cpp.h"
 
 namespace nt {
+
+using wpi::ArrayRef;
+using wpi::StringRef;
+using wpi::Twine;
 
 /**
  * NetworkTables Instance.
@@ -85,7 +90,7 @@ class NetworkTableInstance final {
   /**
    * Construct from native handle.
    *
-   * @param inst Native handle
+   * @param handle Native handle
    */
   explicit NetworkTableInstance(NT_Inst inst) noexcept;
 
@@ -130,7 +135,7 @@ class NetworkTableInstance final {
    * @param name Key
    * @return Network table entry.
    */
-  NetworkTableEntry GetEntry(std::string_view name);
+  NetworkTableEntry GetEntry(const Twine& name);
 
   /**
    * Get entries starting with the given prefix.
@@ -143,7 +148,7 @@ class NetworkTableInstance final {
    * @param types bitmask of types; 0 is treated as a "don't care"
    * @return Array of entries.
    */
-  std::vector<NetworkTableEntry> GetEntries(std::string_view prefix,
+  std::vector<NetworkTableEntry> GetEntries(const Twine& prefix,
                                             unsigned int types);
 
   /**
@@ -157,7 +162,7 @@ class NetworkTableInstance final {
    * @param types bitmask of types; 0 is treated as a "don't care"
    * @return Array of entry information.
    */
-  std::vector<EntryInfo> GetEntryInfo(std::string_view prefix,
+  std::vector<EntryInfo> GetEntryInfo(const Twine& prefix,
                                       unsigned int types) const;
 
   /**
@@ -166,7 +171,7 @@ class NetworkTableInstance final {
    * @param key the key name
    * @return The network table
    */
-  std::shared_ptr<NetworkTable> GetTable(std::string_view key) const;
+  std::shared_ptr<NetworkTable> GetTable(const Twine& key) const;
 
   /**
    * Deletes ALL keys in ALL subtables (except persistent values).
@@ -188,7 +193,7 @@ class NetworkTableInstance final {
    * @return Listener handle
    */
   NT_EntryListener AddEntryListener(
-      std::string_view prefix,
+      const Twine& prefix,
       std::function<void(const EntryNotification& event)> callback,
       unsigned int flags) const;
 
@@ -282,7 +287,7 @@ class NetworkTableInstance final {
    *
    * @param name      identity to advertise
    */
-  void SetNetworkIdentity(std::string_view name);
+  void SetNetworkIdentity(const Twine& name);
 
   /**
    * Get the current network mode.
@@ -313,7 +318,7 @@ class NetworkTableInstance final {
    *                          address (UTF-8 string, null terminated)
    * @param port              port to communicate over
    */
-  void StartServer(std::string_view persist_filename = "networktables.ini",
+  void StartServer(const Twine& persist_filename = "networktables.ini",
                    const char* listen_address = "",
                    unsigned int port = kDefaultPort);
 
@@ -341,8 +346,7 @@ class NetworkTableInstance final {
    *
    * @param servers   array of server name and port pairs
    */
-  void StartClient(
-      wpi::span<const std::pair<std::string_view, unsigned int>> servers);
+  void StartClient(ArrayRef<std::pair<StringRef, unsigned int>> servers);
 
   /**
    * Starts a client using the specified servers and port.  The
@@ -351,7 +355,7 @@ class NetworkTableInstance final {
    * @param servers   array of server names
    * @param port      port to communicate over
    */
-  void StartClient(wpi::span<const std::string_view> servers,
+  void StartClient(ArrayRef<StringRef> servers,
                    unsigned int port = kDefaultPort);
 
   /**
@@ -382,8 +386,7 @@ class NetworkTableInstance final {
    *
    * @param servers   array of server name and port pairs
    */
-  void SetServer(
-      wpi::span<const std::pair<std::string_view, unsigned int>> servers);
+  void SetServer(ArrayRef<std::pair<StringRef, unsigned int>> servers);
 
   /**
    * Sets server addresses and port for client (without restarting client).
@@ -392,8 +395,7 @@ class NetworkTableInstance final {
    * @param servers   array of server names
    * @param port      port to communicate over
    */
-  void SetServer(wpi::span<const std::string_view> servers,
-                 unsigned int port = kDefaultPort);
+  void SetServer(ArrayRef<StringRef> servers, unsigned int port = kDefaultPort);
 
   /**
    * Sets server addresses and port for client (without restarting client).
@@ -464,7 +466,7 @@ class NetworkTableInstance final {
    * @param filename  filename
    * @return error string, or nullptr if successful
    */
-  const char* SavePersistent(std::string_view filename) const;
+  const char* SavePersistent(const Twine& filename) const;
 
   /**
    * Load persistent values from a file.  The server automatically does this
@@ -476,7 +478,7 @@ class NetworkTableInstance final {
    * @return error string, or nullptr if successful
    */
   const char* LoadPersistent(
-      std::string_view filename,
+      const Twine& filename,
       std::function<void(size_t line, const char* msg)> warn);
 
   /**
@@ -487,8 +489,7 @@ class NetworkTableInstance final {
    * @param prefix    save only keys starting with this prefix
    * @return error string, or nullptr if successful
    */
-  const char* SaveEntries(std::string_view filename,
-                          std::string_view prefix) const;
+  const char* SaveEntries(const Twine& filename, const Twine& prefix) const;
 
   /**
    * Load table values from a file.  The file format used is identical to
@@ -500,54 +501,8 @@ class NetworkTableInstance final {
    * @return error string, or nullptr if successful
    */
   const char* LoadEntries(
-      std::string_view filename, std::string_view prefix,
+      const Twine& filename, const Twine& prefix,
       std::function<void(size_t line, const char* msg)> warn);
-
-  /** @} */
-
-  /**
-   * @{
-   * @name Data Logger Functions
-   */
-
-  /**
-   * Starts logging entry changes to a DataLog.
-   *
-   * @param log data log object; lifetime must extend until StopEntryDataLog is
-   *            called or the instance is destroyed
-   * @param prefix only store entries with names that start with this prefix;
-   *               the prefix is not included in the data log entry name
-   * @param logPrefix prefix to add to data log entry names
-   * @return Data logger handle
-   */
-  NT_DataLogger StartEntryDataLog(wpi::log::DataLog& log,
-                                  std::string_view prefix,
-                                  std::string_view logPrefix);
-
-  /**
-   * Stops logging entry changes to a DataLog.
-   *
-   * @param logger data logger handle
-   */
-  static void StopEntryDataLog(NT_DataLogger logger);
-
-  /**
-   * Starts logging connection changes to a DataLog.
-   *
-   * @param log data log object; lifetime must extend until
-   *            StopConnectionDataLog is called or the instance is destroyed
-   * @param name data log entry name
-   * @return Data logger handle
-   */
-  NT_ConnectionDataLogger StartConnectionDataLog(wpi::log::DataLog& log,
-                                                 std::string_view name);
-
-  /**
-   * Stops logging connection changes to a DataLog.
-   *
-   * @param logger data logger handle
-   */
-  static void StopConnectionDataLog(NT_ConnectionDataLogger logger);
 
   /** @} */
 
@@ -569,7 +524,7 @@ class NetworkTableInstance final {
    * @return Logger handle
    */
   NT_Logger AddLogger(std::function<void(const LogMessage& msg)> func,
-                      unsigned int minLevel, unsigned int maxLevel);
+                      unsigned int min_level, unsigned int max_level);
 
   /**
    * Remove a logger.
@@ -612,6 +567,6 @@ class NetworkTableInstance final {
 
 }  // namespace nt
 
-#include "networktables/NetworkTableInstance.inc"
+#include "networktables/NetworkTableInstance.inl"
 
 #endif  // NTCORE_NETWORKTABLES_NETWORKTABLEINSTANCE_H_

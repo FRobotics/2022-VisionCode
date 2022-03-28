@@ -6,11 +6,11 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableValue.h>
 #include <wpi/StringMap.h>
+#include <wpi/Twine.h>
 
 #include "frc/shuffleboard/ShuffleboardValue.h"
 
@@ -24,9 +24,12 @@ class ShuffleboardContainer;
 class ShuffleboardComponentBase : public virtual ShuffleboardValue {
  public:
   ShuffleboardComponentBase(ShuffleboardContainer& parent,
-                            std::string_view title, std::string_view type = "");
+                            const wpi::Twine& title,
+                            const wpi::Twine& type = "");
 
-  void SetType(std::string_view type);
+  ~ShuffleboardComponentBase() override = default;
+
+  void SetType(const wpi::Twine& type);
 
   void BuildMetadata(std::shared_ptr<nt::NetworkTable> metaTable);
 

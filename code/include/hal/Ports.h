@@ -119,56 +119,28 @@ int32_t HAL_GetNumRelayHeaders(void);
  *
  * @return the number of PCM modules
  */
-int32_t HAL_GetNumCTREPCMModules(void);
+int32_t HAL_GetNumPCMModules(void);
 
 /**
  * Gets the number of solenoid channels in the current system.
  *
  * @return the number of solenoid channels
  */
-int32_t HAL_GetNumCTRESolenoidChannels(void);
+int32_t HAL_GetNumSolenoidChannels(void);
 
 /**
  * Gets the number of PDP modules in the current system.
  *
  * @return the number of PDP modules
  */
-int32_t HAL_GetNumCTREPDPModules(void);
+int32_t HAL_GetNumPDPModules(void);
 
 /**
  * Gets the number of PDP channels in the current system.
  *
  * @return the number of PDP channels
  */
-int32_t HAL_GetNumCTREPDPChannels(void);
-
-/**
- * Gets the number of PDH modules in the current system.
- *
- * @return the number of PDH modules
- */
-int32_t HAL_GetNumREVPDHModules(void);
-
-/**
- * Gets the number of PDH channels in the current system.
- *
- * @return the number of PDH channels
- */
-int32_t HAL_GetNumREVPDHChannels(void);
-
-/**
- * Gets the number of PH modules in the current system.
- *
- * @return the number of PH modules
- */
-int32_t HAL_GetNumREVPHModules(void);
-
-/**
- * Gets the number of PH channels in the current system.
- *
- * @return the number of PH channels
- */
-int32_t HAL_GetNumREVPHChannels(void);
+int32_t HAL_GetNumPDPChannels(void);
 
 /**
  * Gets the number of duty cycle inputs in the current system.

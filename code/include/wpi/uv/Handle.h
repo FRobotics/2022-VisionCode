@@ -7,13 +7,12 @@
 
 #include <uv.h>
 
-#include <cstdlib>
 #include <functional>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "wpi/Signal.h"
+#include "wpi/StringRef.h"
 #include "wpi/uv/Buffer.h"
 #include "wpi/uv/Error.h"
 #include "wpi/uv/Loop.h"
@@ -50,7 +49,7 @@ class Handle : public std::enable_shared_from_this<Handle> {
   /**
    * Get the name of the type of the handle.  E.g. "pipe" for pipe handles.
    */
-  std::string_view GetTypeName() const noexcept {
+  StringRef GetTypeName() const noexcept {
     return uv_handle_type_name(m_uv_handle->type);
   }
 
@@ -191,8 +190,8 @@ class Handle : public std::enable_shared_from_this<Handle> {
    */
   void SetBufferAllocator(std::function<Buffer(size_t)> alloc,
                           std::function<void(Buffer&)> dealloc) {
-    m_allocBuf = std::move(alloc);
-    m_freeBuf = std::move(dealloc);
+    m_allocBuf = alloc;
+    m_freeBuf = dealloc;
   }
 
   /**
@@ -289,7 +288,7 @@ class HandleImpl : public Handle {
   }
 
  protected:
-  HandleImpl() : Handle{static_cast<uv_handle_t*>(std::malloc(sizeof(U)))} {}
+  HandleImpl() : Handle{reinterpret_cast<uv_handle_t*>(new U)} {}
 };
 
 }  // namespace wpi::uv

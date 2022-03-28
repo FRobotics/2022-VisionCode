@@ -49,12 +49,9 @@ template <typename Derived, typename TUserInfo,
           typename TNotifierData = TUserInfo>
 class CallbackThread : public wpi::SafeThread {
  public:
-  using UserInfo = TUserInfo;
+  typedef TUserInfo UserInfo;
   using NotifierData = TNotifierData;
   using ListenerData = TListenerData;
-
-  CallbackThread(std::function<void()> on_start, std::function<void()> on_exit)
-      : m_on_start(std::move(on_start)), m_on_exit(std::move(on_exit)) {}
 
   ~CallbackThread() override {
     // Wake up any blocked pollers
@@ -88,9 +85,6 @@ class CallbackThread : public wpi::SafeThread {
   };
   wpi::UidVector<std::shared_ptr<Poller>, 64> m_pollers;
 
-  std::function<void()> m_on_start;
-  std::function<void()> m_on_exit;
-
   // Must be called with m_mutex held
   template <typename... Args>
   void SendPoller(unsigned int poller_uid, Args&&... args) {
@@ -112,22 +106,18 @@ class CallbackThread : public wpi::SafeThread {
 template <typename Derived, typename TUserInfo, typename TListenerData,
           typename TNotifierData>
 void CallbackThread<Derived, TUserInfo, TListenerData, TNotifierData>::Main() {
-  if (m_on_start) {
-    m_on_start();
-  }
-
   std::unique_lock lock(m_mutex);
   while (m_active) {
     while (m_queue.empty()) {
       m_cond.wait(lock);
       if (!m_active) {
-        goto done;
+        return;
       }
     }
 
     while (!m_queue.empty()) {
       if (!m_active) {
-        goto done;
+        return;
       }
       auto item = std::move(m_queue.front());
 
@@ -154,7 +144,6 @@ void CallbackThread<Derived, TUserInfo, TListenerData, TNotifierData>::Main() {
           if (!listener) {
             continue;
           }
-
           if (!static_cast<Derived*>(this)->Matches(listener, item.second)) {
             continue;
           }
@@ -175,11 +164,6 @@ void CallbackThread<Derived, TUserInfo, TListenerData, TNotifierData>::Main() {
 
     m_queue_empty.notify_all();
   }
-
-done:
-  if (m_on_exit) {
-    m_on_exit();
-  }
 }
 
 // CRTP callback manager
@@ -193,14 +177,6 @@ class CallbackManager {
   friend class RpcServerTest;
 
  public:
-  void SetOnStart(std::function<void()> on_start) {
-    m_on_start = std::move(on_start);
-  }
-
-  void SetOnExit(std::function<void()> on_exit) {
-    m_on_exit = std::move(on_exit);
-  }
-
   void Stop() { m_owner.Stop(); }
 
   void Remove(unsigned int listener_uid) {
@@ -240,7 +216,7 @@ class CallbackManager {
       return;
     }
     poller->Terminate();
-    thr->m_pollers.erase(poller_uid);
+    return thr->m_pollers.erase(poller_uid);
   }
 
   bool WaitForQueue(double timeout) {
@@ -357,7 +333,7 @@ class CallbackManager {
  protected:
   template <typename... Args>
   void DoStart(Args&&... args) {
-    m_owner.Start(m_on_start, m_on_exit, std::forward<Args>(args)...);
+    m_owner.Start(std::forward<Args>(args)...);
   }
 
   template <typename... Args>
@@ -385,9 +361,6 @@ class CallbackManager {
 
  private:
   wpi::SafeThreadOwner<Thread> m_owner;
-
-  std::function<void()> m_on_start;
-  std::function<void()> m_on_exit;
 };
 
 }  // namespace wpi

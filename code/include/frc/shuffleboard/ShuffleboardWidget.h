@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <string_view>
+#include <wpi/Twine.h>
 
 #include "frc/shuffleboard/BuiltInWidgets.h"
 #include "frc/shuffleboard/ShuffleboardComponent.h"
@@ -28,7 +28,7 @@ const char* GetStringForWidgetType(BuiltInWidgets type);
 template <typename Derived>
 class ShuffleboardWidget : public ShuffleboardComponent<Derived> {
  public:
-  ShuffleboardWidget(ShuffleboardContainer& parent, std::string_view title)
+  ShuffleboardWidget(ShuffleboardContainer& parent, const wpi::Twine& title)
       : ShuffleboardValue(title),
         ShuffleboardComponent<Derived>(parent, title) {}
 
@@ -60,12 +60,13 @@ class ShuffleboardWidget : public ShuffleboardComponent<Derived> {
    * widget type will be used. This method should only be used to use a widget
    * that does not come built into Shuffleboard (i.e. one that comes with a
    * custom or third-party plugin). To use a widget that is built into
-   * Shuffleboard, use WithWidget(WidgetType) and BuiltInWidgets.
+   * Shuffleboard, use {@link #withWidget(WidgetType)} and {@link
+   * BuiltInWidgets}.
    *
    * @param widgetType the type of the widget used to display the data
    * @return this widget object
    */
-  Derived& WithWidget(std::string_view widgetType) {
+  Derived& WithWidget(const wpi::Twine& widgetType) {
     this->SetType(widgetType);
     return *static_cast<Derived*>(this);
   }

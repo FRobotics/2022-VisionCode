@@ -6,25 +6,26 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 
 #include <networktables/NetworkTable.h>
+#include <wpi/SmallVector.h>
+#include <wpi/StringRef.h>
 
 namespace frc {
 
 class ShuffleboardValue {
  public:
-  explicit ShuffleboardValue(std::string_view title) : m_title(title) {}
+  explicit ShuffleboardValue(const wpi::Twine& title) {
+    wpi::SmallVector<char, 16> storage;
+    m_title = title.toStringRef(storage);
+  }
 
   virtual ~ShuffleboardValue() = default;
-
-  ShuffleboardValue(const ShuffleboardValue&) = delete;
-  ShuffleboardValue& operator=(const ShuffleboardValue&) = delete;
 
   /**
    * Gets the title of this Shuffleboard value.
    */
-  const std::string& GetTitle() const { return m_title; }
+  wpi::StringRef GetTitle() const { return m_title; }
 
   /**
    * Builds the entries for this value.
@@ -47,7 +48,7 @@ class ShuffleboardValue {
    *
    * This method is package-private to prevent users from enabling control
    * themselves. Has no effect if the sendable is not marked as an actuator with
-   * SendableBuilder::SetActuator().
+   * {@link SendableBuilder#setActuator}.
    */
   virtual void EnableIfActuator() {}
 
@@ -56,7 +57,7 @@ class ShuffleboardValue {
    *
    * This method is package-private to prevent users from enabling control
    * themselves. Has no effect if the sendable is not marked as an actuator with
-   * SendableBuilder::SetActuator().
+   * {@link SendableBuilder#setActuator}.
    */
   virtual void DisableIfActuator() {}
 

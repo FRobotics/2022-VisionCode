@@ -5,7 +5,6 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
 
 #include "frc/shuffleboard/ShuffleboardRoot.h"
 #include "frc/shuffleboard/ShuffleboardTab.h"
@@ -20,7 +19,7 @@ class ShuffleboardInstance final : public ShuffleboardRoot {
   ShuffleboardInstance(ShuffleboardInstance&&) = default;
   ShuffleboardInstance& operator=(ShuffleboardInstance&&) = default;
 
-  frc::ShuffleboardTab& GetTab(std::string_view title) override;
+  frc::ShuffleboardTab& GetTab(wpi::StringRef title) override;
 
   void Update() override;
 
@@ -30,7 +29,7 @@ class ShuffleboardInstance final : public ShuffleboardRoot {
 
   void SelectTab(int index) override;
 
-  void SelectTab(std::string_view) override;
+  void SelectTab(wpi::StringRef) override;
 
  private:
   struct Impl;

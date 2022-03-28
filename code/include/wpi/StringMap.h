@@ -15,11 +15,13 @@
 #define WPIUTIL_WPI_STRINGMAP_H
 
 #include "wpi/SmallVector.h"
+#include "wpi/StringRef.h"
 #include "wpi/iterator.h"
 #include "wpi/iterator_range.h"
 #include "wpi/MemAlloc.h"
 #include "wpi/PointerLikeTypeTraits.h"
 #include "wpi/ErrorHandling.h"
+#include "wpi/deprecated.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -27,7 +29,6 @@
 #include <cstring>
 #include <initializer_list>
 #include <iterator>
-#include <string_view>
 #include <utility>
 
 namespace wpi {
@@ -81,12 +82,12 @@ protected:
   /// specified bucket will be non-null.  Otherwise, it will be null.  In either
   /// case, the FullHashValue field of the bucket will be set to the hash value
   /// of the string.
-  unsigned LookupBucketFor(std::string_view Key);
+  unsigned LookupBucketFor(StringRef Key);
 
   /// FindKey - Look up the bucket that contains the specified key. If it exists
   /// in the map, return the bucket number of the key.  Otherwise return -1.
   /// This does not modify the map.
-  int FindKey(std::string_view Key) const;
+  int FindKey(StringRef Key) const;
 
   /// RemoveKey - Remove the specified StringMapEntry from the table, but do not
   /// delete it.  This aborts if the value isn't in the table.
@@ -94,7 +95,7 @@ protected:
 
   /// RemoveKey - Remove the StringMapEntry for the specified key from the
   /// table, returning it.  If the key is not in the table, this returns null.
-  StringMapEntryBase *RemoveKey(std::string_view Key);
+  StringMapEntryBase *RemoveKey(StringRef Key);
 
   /// Allocate the table with the specified number of buckets and otherwise
   /// setup the map as empty.
@@ -136,8 +137,8 @@ public:
       : StringMapEntryBase(strLen), second(std::forward<InitTy>(InitVals)...) {}
   StringMapEntry(StringMapEntry &E) = delete;
 
-  std::string_view getKey() const {
-    return {getKeyData(), getKeyLength()};
+  StringRef getKey() const {
+    return StringRef(getKeyData(), getKeyLength());
   }
 
   const ValueTy &getValue() const { return second; }
@@ -150,12 +151,12 @@ public:
   /// StringMapEntry object.
   const char *getKeyData() const {return reinterpret_cast<const char*>(this+1);}
 
-  std::string_view first() const { return {getKeyData(), getKeyLength()}; }
+  StringRef first() const { return StringRef(getKeyData(), getKeyLength()); }
 
   /// Create a StringMapEntry for the specified key construct the value using
   /// \p InitiVals.
   template <typename... InitTy>
-  static StringMapEntry *Create(std::string_view Key, InitTy &&... InitVals) {
+  static StringMapEntry *Create(StringRef Key, InitTy &&... InitVals) {
     size_t KeyLength = Key.size();
 
     // Allocate a new item with space for the string at the end and a null
@@ -176,7 +177,7 @@ public:
     return NewItem;
   }
 
-  static StringMapEntry *Create(std::string_view Key) {
+  static StringMapEntry *Create(StringRef Key) {
     return Create(Key, ValueTy());
   }
 
@@ -211,7 +212,7 @@ public:
   explicit StringMap(unsigned InitialSize)
     : StringMapImpl(InitialSize, static_cast<unsigned>(sizeof(MapEntryTy))) {}
 
-  StringMap(std::initializer_list<std::pair<std::string_view, ValueTy>> List)
+  StringMap(std::initializer_list<std::pair<StringRef, ValueTy>> List)
       : StringMapImpl(List.size(), static_cast<unsigned>(sizeof(MapEntryTy))) {
     for (const auto &P : List) {
       insert(P);
@@ -301,13 +302,13 @@ public:
                       StringMapKeyIterator<ValueTy>(end()));
   }
 
-  iterator find(std::string_view Key) {
+  iterator find(StringRef Key) {
     int Bucket = FindKey(Key);
     if (Bucket == -1) return end();
     return iterator(TheTable+Bucket, true);
   }
 
-  const_iterator find(std::string_view Key) const {
+  const_iterator find(StringRef Key) const {
     int Bucket = FindKey(Key);
     if (Bucket == -1) return end();
     return const_iterator(TheTable+Bucket, true);
@@ -315,7 +316,7 @@ public:
 
   /// lookup - Return the entry for the specified key, or a default
   /// constructed value if no such entry exists.
-  ValueTy lookup(std::string_view Key) const {
+  ValueTy lookup(StringRef Key) const {
     const_iterator it = find(Key);
     if (it != end())
       return it->second;
@@ -324,10 +325,10 @@ public:
 
   /// Lookup the ValueTy for the \p Key, or create a default constructed value
   /// if the key is not in the map.
-  ValueTy &operator[](std::string_view Key) { return try_emplace(Key).first->second; }
+  ValueTy &operator[](StringRef Key) { return try_emplace(Key).first->second; }
 
   /// count - Return 1 if the element is in the map, 0 otherwise.
-  size_type count(std::string_view Key) const {
+  size_type count(StringRef Key) const {
     return find(Key) == end() ? 0 : 1;
   }
 
@@ -354,7 +355,7 @@ public:
   /// isn't already in the map. The bool component of the returned pair is true
   /// if and only if the insertion takes place, and the iterator component of
   /// the pair points to the element with key equivalent to the key of the pair.
-  std::pair<iterator, bool> insert(std::pair<std::string_view, ValueTy> KV) {
+  std::pair<iterator, bool> insert(std::pair<StringRef, ValueTy> KV) {
     return try_emplace(KV.first, std::move(KV.second));
   }
 
@@ -363,7 +364,7 @@ public:
   /// if and only if the insertion takes place, and the iterator component of
   /// the pair points to the element with key equivalent to the key of the pair.
   template <typename... ArgsTy>
-  std::pair<iterator, bool> try_emplace(std::string_view Key, ArgsTy &&... Args) {
+  std::pair<iterator, bool> try_emplace(StringRef Key, ArgsTy &&... Args) {
     unsigned BucketNo = LookupBucketFor(Key);
     StringMapEntryBase *&Bucket = TheTable[BucketNo];
     if (Bucket && Bucket != getTombstoneVal())
@@ -410,7 +411,7 @@ public:
     V.Destroy();
   }
 
-  bool erase(std::string_view Key) {
+  bool erase(StringRef Key) {
     iterator I = find(Key);
     if (I == end()) return false;
     erase(I);
@@ -439,13 +440,7 @@ public:
     return static_cast<DerivedTy &>(*this);
   }
 
-#if __cplusplus < 202002L
   bool operator==(const DerivedTy &RHS) const { return Ptr == RHS.Ptr; }
-#else
-  friend bool operator==(const DerivedTy &LHS, const DerivedTy &RHS) {
-    return LHS.Ptr == RHS.Ptr;
-  }
-#endif
 
   DerivedTy &operator++() { // Preincrement
     ++Ptr;
@@ -529,23 +524,23 @@ template <typename ValueTy>
 class StringMapKeyIterator
     : public iterator_adaptor_base<StringMapKeyIterator<ValueTy>,
                                    StringMapConstIterator<ValueTy>,
-                                   std::forward_iterator_tag, std::string_view> {
+                                   std::forward_iterator_tag, StringRef> {
   using base = iterator_adaptor_base<StringMapKeyIterator<ValueTy>,
                                      StringMapConstIterator<ValueTy>,
-                                     std::forward_iterator_tag, std::string_view>;
+                                     std::forward_iterator_tag, StringRef>;
 
 public:
   StringMapKeyIterator() = default;
   explicit StringMapKeyIterator(StringMapConstIterator<ValueTy> Iter)
       : base(std::move(Iter)) {}
 
-  std::string_view &operator*() {
+  StringRef &operator*() {
     Key = this->wrapped()->getKey();
     return Key;
   }
 
 private:
-  std::string_view Key;
+  StringRef Key;
 };
 
 template <typename ValueTy>
@@ -599,13 +594,13 @@ bool operator<(const StringMap<ValueTy>& lhs, const StringMap<ValueTy>& rhs) {
   if (&lhs == &rhs) return false;
 
   // copy into vectors and sort by key
-  SmallVector<std::string_view, 16> lhs_keys;
+  SmallVector<StringRef, 16> lhs_keys;
   lhs_keys.reserve(lhs.size());
   for (auto i = lhs.begin(), end = lhs.end(); i != end; ++i)
     lhs_keys.push_back(i->getKey());
   std::sort(lhs_keys.begin(), lhs_keys.end());
 
-  SmallVector<std::string_view, 16> rhs_keys;
+  SmallVector<StringRef, 16> rhs_keys;
   rhs_keys.reserve(rhs.size());
   for (auto i = rhs.begin(), end = rhs.end(); i != end; ++i)
     rhs_keys.push_back(i->getKey());

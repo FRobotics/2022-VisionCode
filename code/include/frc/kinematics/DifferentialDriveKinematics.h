@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
-
 #include "frc/kinematics/ChassisSpeeds.h"
 #include "frc/kinematics/DifferentialDriveWheelSpeeds.h"
 #include "units/angle.h"
@@ -21,7 +19,7 @@ namespace frc {
  * velocity components whereas forward kinematics converts left and right
  * component velocities into a linear and angular chassis speed.
  */
-class WPILIB_DLLEXPORT DifferentialDriveKinematics {
+class DifferentialDriveKinematics {
  public:
   /**
    * Constructs a differential drive kinematics object.

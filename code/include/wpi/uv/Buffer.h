@@ -9,11 +9,11 @@
 
 #include <cstring>
 #include <initializer_list>
-#include <string_view>
 #include <utility>
 
+#include "wpi/ArrayRef.h"
 #include "wpi/SmallVector.h"
-#include "wpi/span.h"
+#include "wpi/StringRef.h"
 
 namespace wpi::uv {
 
@@ -30,9 +30,9 @@ class Buffer : public uv_buf_t {
     base = oth.base;
     len = oth.len;
   }
-  /*implicit*/ Buffer(std::string_view str)  // NOLINT
+  /*implicit*/ Buffer(StringRef str)  // NOLINT
       : Buffer{str.data(), str.size()} {}
-  /*implicit*/ Buffer(span<const uint8_t> arr)  // NOLINT
+  /*implicit*/ Buffer(ArrayRef<uint8_t> arr)  // NOLINT
       : Buffer{reinterpret_cast<const char*>(arr.data()), arr.size()} {}
   Buffer(char* base_, size_t len_) {
     base = base_;
@@ -43,21 +43,21 @@ class Buffer : public uv_buf_t {
     len = static_cast<decltype(len)>(len_);
   }
 
-  span<const char> data() const { return {base, len}; }
-  span<char> data() { return {base, len}; }
+  ArrayRef<char> data() const { return ArrayRef<char>{base, len}; }
+  MutableArrayRef<char> data() { return MutableArrayRef<char>{base, len}; }
 
-  operator span<const char>() const { return data(); }  // NOLINT
-  operator span<char>() { return data(); }              // NOLINT
+  operator ArrayRef<char>() const { return data(); }   // NOLINT
+  operator MutableArrayRef<char>() { return data(); }  // NOLINT
 
   static Buffer Allocate(size_t size) { return Buffer{new char[size], size}; }
 
-  static Buffer Dup(std::string_view in) {
+  static Buffer Dup(StringRef in) {
     Buffer buf = Allocate(in.size());
     std::memcpy(buf.base, in.data(), in.size());
     return buf;
   }
 
-  static Buffer Dup(span<const uint8_t> in) {
+  static Buffer Dup(ArrayRef<uint8_t> in) {
     Buffer buf = Allocate(in.size());
     std::memcpy(buf.base, in.begin(), in.size());
     return buf;
@@ -131,7 +131,7 @@ class SimpleBufferPool {
    * This is NOT safe to use with arbitrary buffers unless they were
    * allocated with the same size as the buffer pool allocation size.
    */
-  void Release(span<Buffer> bufs) {
+  void Release(MutableArrayRef<Buffer> bufs) {
     for (auto& buf : bufs) {
       m_pool.emplace_back(buf.Move());
     }

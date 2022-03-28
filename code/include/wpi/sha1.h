@@ -23,7 +23,8 @@
 #include <stdint.h>
 
 #include <string>
-#include <string_view>
+
+#include "wpi/StringRef.h"
 
 namespace wpi {
 template <typename T>
@@ -33,12 +34,12 @@ class raw_istream;
 class SHA1 {
  public:
   SHA1();
-  void Update(std::string_view s);
+  void Update(StringRef s);
   void Update(raw_istream& is);
   std::string Final();
-  std::string_view Final(SmallVectorImpl<char>& buf);
-  std::string_view RawFinal(SmallVectorImpl<char>& buf);
-  static std::string FromFile(std::string_view filename);
+  StringRef Final(SmallVectorImpl<char>& buf);
+  StringRef RawFinal(SmallVectorImpl<char>& buf);
+  static std::string FromFile(StringRef filename);
 
  private:
   uint32_t digest[5];

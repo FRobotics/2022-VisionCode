@@ -4,25 +4,22 @@
 
 #include <cstdio>
 #include <string>
-#include <string_view>
 #include <thread>
 #include <vector>
 
-#include <fmt/format.h>
 #include <networktables/NetworkTableInstance.h>
 #include <vision/VisionPipeline.h>
 #include <vision/VisionRunner.h>
-#include <wpi/StringExtras.h>
+#include <wpi/StringRef.h>
 #include <wpi/json.h>
 #include <wpi/raw_istream.h>
 #include <wpi/raw_ostream.h>
 
 #include "cameraserver/CameraServer.h"
 
-//#include <wpi/StringRef.h>
-//#include <iostream>
-
+// TEAM 4150
 #include "GripPipeline.cpp"
+
 
 /*
    JSON format:
@@ -90,8 +87,8 @@ std::vector<CameraConfig> cameraConfigs;
 std::vector<SwitchedCameraConfig> switchedCameraConfigs;
 std::vector<cs::VideoSource> cameras;
 
-void ParseError(std::string_view msg) {
-  fmt::print(stderr, "config error in '{}': {}\n", configFile, msg);
+wpi::raw_ostream& ParseError() {
+  return wpi::errs() << "config error in '" << configFile << "': ";
 }
 
 bool ReadCameraConfig(const wpi::json& config) {
@@ -101,7 +98,7 @@ bool ReadCameraConfig(const wpi::json& config) {
   try {
     c.name = config.at("name").get<std::string>();
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("could not read camera name: {}", e.what()));
+    ParseError() << "could not read camera name: " << e.what() << '\n';
     return false;
   }
 
@@ -109,7 +106,8 @@ bool ReadCameraConfig(const wpi::json& config) {
   try {
     c.path = config.at("path").get<std::string>();
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("camera '{}': could not read path: {}", c.name, e.what()));
+    ParseError() << "camera '" << c.name
+                 << "': could not read path: " << e.what() << '\n';
     return false;
   }
 
@@ -129,8 +127,7 @@ bool ReadSwitchedCameraConfig(const wpi::json& config) {
   try {
     c.name = config.at("name").get<std::string>();
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("could not read switched camera name: {}",
-                           e.what()));
+    ParseError() << "could not read switched camera name: " << e.what() << '\n';
     return false;
   }
 
@@ -138,8 +135,8 @@ bool ReadSwitchedCameraConfig(const wpi::json& config) {
   try {
     c.key = config.at("key").get<std::string>();
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("switched camera '{}': could not read key: {}",
-                           c.name, e.what()));
+    ParseError() << "switched camera '" << c.name
+                 << "': could not read key: " << e.what() << '\n';
     return false;
   }
 
@@ -162,13 +159,13 @@ bool ReadConfig() {
   try {
     j = wpi::json::parse(is);
   } catch (const wpi::json::parse_error& e) {
-    ParseError(fmt::format("byte {}: {}", e.byte, e.what()));
+    ParseError() << "byte " << e.byte << ": " << e.what() << '\n';
     return false;
   }
 
   // top level must be an object
   if (!j.is_object()) {
-    ParseError("must be JSON object");
+    ParseError() << "must be JSON object\n";
     return false;
   }
 
@@ -176,7 +173,7 @@ bool ReadConfig() {
   try {
     team = j.at("team").get<unsigned int>();
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("could not read team number: {}", e.what()));
+    ParseError() << "could not read team number: " << e.what() << '\n';
     return false;
   }
 
@@ -184,15 +181,16 @@ bool ReadConfig() {
   if (j.count("ntmode") != 0) {
     try {
       auto str = j.at("ntmode").get<std::string>();
-      if (wpi::equals_lower(str, "client")) {
+      wpi::StringRef s(str);
+      if (s.equals_lower("client")) {
         server = false;
-      } else if (wpi::equals_lower(str, "server")) {
+      } else if (s.equals_lower("server")) {
         server = true;
       } else {
-        ParseError(fmt::format("could not understand ntmode value '{}'", str));
+        ParseError() << "could not understand ntmode value '" << str << "'\n";
       }
     } catch (const wpi::json::exception& e) {
-      ParseError(fmt::format("could not read ntmode: {}", e.what()));
+      ParseError() << "could not read ntmode: " << e.what() << '\n';
     }
   }
 
@@ -202,7 +200,7 @@ bool ReadConfig() {
       if (!ReadCameraConfig(camera)) return false;
     }
   } catch (const wpi::json::exception& e) {
-    ParseError(fmt::format("could not read cameras: {}", e.what()));
+    ParseError() << "could not read cameras: " << e.what() << '\n';
     return false;
   }
 
@@ -213,7 +211,7 @@ bool ReadConfig() {
         if (!ReadSwitchedCameraConfig(camera)) return false;
       }
     } catch (const wpi::json::exception& e) {
-      ParseError(fmt::format("could not read switched cameras: {}", e.what()));
+      ParseError() << "could not read switched cameras: " << e.what() << '\n';
       return false;
     }
   }
@@ -222,9 +220,11 @@ bool ReadConfig() {
 }
 
 cs::UsbCamera StartCamera(const CameraConfig& config) {
-  fmt::print("Starting camera '{}' on {}\n", config.name, config.path);
+  wpi::outs() << "Starting camera '" << config.name << "' on " << config.path
+              << '\n';
+  auto inst = frc::CameraServer::GetInstance();
   cs::UsbCamera camera{config.name, config.path};
-  auto server = frc::CameraServer::StartAutomaticCapture(camera);
+  auto server = inst->StartAutomaticCapture(camera);
 
   camera.SetConfigJson(config.config);
   camera.SetConnectionStrategy(cs::VideoSource::kConnectionKeepOpen);
@@ -236,8 +236,10 @@ cs::UsbCamera StartCamera(const CameraConfig& config) {
 }
 
 cs::MjpegServer StartSwitchedCamera(const SwitchedCameraConfig& config) {
-  fmt::print("Starting switched camera '{}' on {}\n", config.name, config.key);
-  auto server = frc::CameraServer::AddSwitchedCamera(config.name);
+  wpi::outs() << "Starting switched camera '" << config.name << "' on "
+              << config.key << '\n';
+  auto server =
+      frc::CameraServer::GetInstance()->AddSwitchedCamera(config.name);
 
   nt::NetworkTableInstance::GetDefault()
       .GetEntry(config.key)
@@ -273,14 +275,14 @@ class MyPipeline : public frc::VisionPipeline {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-
-  fmt::print("\nStarting vision program.  Starting wait.\n");
-
-  std::this_thread::sleep_for(std::chrono::seconds(29));
-
-  fmt::print("Wait complete.\n");
-
   if (argc >= 2) configFile = argv[1];
+
+  // TEAM 4150
+  wpi::errs() << "\n";
+  wpi::errs() << "Starting vision program.\n";
+  wpi::errs() << "Starting wait to allow roborio and radio to boot.\n";
+  std::this_thread::sleep_for(std::chrono::seconds(29));
+  wpi::errs() << "Wait complete.  Resuming startup.\n";
 
   // read configuration
   if (!ReadConfig()) return EXIT_FAILURE;
@@ -288,10 +290,10 @@ int main(int argc, char* argv[]) {
   // start NetworkTables
   auto ntinst = nt::NetworkTableInstance::GetDefault();
   if (server) {
-    fmt::print("Setting up NetworkTables server\n");
+    wpi::outs() << "Setting up NetworkTables server\n";
     ntinst.StartServer();
   } else {
-    fmt::print("Setting up NetworkTables client for team {}\n", team);
+    wpi::outs() << "Setting up NetworkTables client for team " << team << '\n';
     ntinst.StartClientTeam(team);
     ntinst.StartDSClient();
   }
@@ -307,19 +309,18 @@ int main(int argc, char* argv[]) {
       visionIndex = cameras.size() - 1; 
     }
   }
-  
+
   // -- TEAM 4150  -- write which camera we are using.
   ntinst.GetEntry("/vision/Debug").SetDouble((double)visionIndex);
   if (visionIndex == 100) {
     ntinst.GetEntry("/vision/Debug").SetString("Vision Index Not Set!");
     visionIndex = 0;	// set to zero if camera named Vision not found.
   }
-  
+  wpi::errs() << "Vision processing camera set to index: " << visionIndex << ".\n";
 
   // start switched cameras
   for (const auto& config : switchedCameraConfigs) StartSwitchedCamera(config);
 
-  
   // TEAM 4150  -- provide the grip class with our network tables instance.
   grip::nt = &ntinst;
 
@@ -368,9 +369,10 @@ int main(int argc, char* argv[]) {
 
       runner.RunForever();
     }).detach();
+      wpi::errs() << "Vision processing thread started.\n";
   }
 
-  fmt::print("Startup complete.\n");
+  wpi::errs() << "Startup complete.\n\n";
 
   // loop forever
   double n = 0;
@@ -379,4 +381,5 @@ int main(int argc, char* argv[]) {
 	grip::FetchVisionNetworkTable();
 	std::this_thread::sleep_for(std::chrono::seconds(1));
   }
+
 }

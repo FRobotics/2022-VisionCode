@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 #include <initializer_list>
 
-#include <wpi/span.h>
+#include <wpi/ArrayRef.h>
 #endif
 
 #include "hal/Types.h"
@@ -832,8 +832,7 @@ class SimDevice {
    * @return simulated enum value object
    */
   SimEnum CreateEnum(const char* name, int32_t direction,
-                     wpi::span<const char* const> options,
-                     int32_t initialValue) {
+                     wpi::ArrayRef<const char*> options, int32_t initialValue) {
     return HAL_CreateSimValueEnum(m_handle, name, direction, options.size(),
                                   const_cast<const char**>(options.data()),
                                   initialValue);
@@ -885,8 +884,8 @@ class SimDevice {
    * @return simulated enum value object
    */
   SimEnum CreateEnumDouble(const char* name, int32_t direction,
-                           wpi::span<const char* const> options,
-                           wpi::span<const double> optionValues,
+                           wpi::ArrayRef<const char*> options,
+                           wpi::ArrayRef<double> optionValues,
                            int32_t initialValue) {
     if (options.size() != optionValues.size()) {
       return {};

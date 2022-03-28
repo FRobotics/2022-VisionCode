@@ -36,6 +36,4 @@ int32_t HALSIM_RegisterSimPeriodicAfterCallback(
     HALSIM_SimPeriodicCallback callback, void* param);
 void HALSIM_CancelSimPeriodicAfterCallback(int32_t uid);
 
-void HALSIM_CancelAllSimPeriodicCallbacks(void);
-
 }  // extern "C"

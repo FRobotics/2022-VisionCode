@@ -10,13 +10,12 @@
 #include <vector>
 
 #include <hal/SimDevice.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
 #include "frc/Counter.h"
+#include "frc/ErrorBase.h"
+#include "frc/PIDSource.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 
@@ -35,9 +34,13 @@ class DigitalOutput;
  * received. The time that the line is high determines the round trip distance
  * (time of flight).
  */
-class Ultrasonic : public wpi::Sendable,
-                   public wpi::SendableHelper<Ultrasonic> {
+class Ultrasonic : public ErrorBase,
+                   public Sendable,
+                   public PIDSource,
+                   public SendableHelper<Ultrasonic> {
  public:
+  enum DistanceUnit { kInches = 0, kMilliMeters = 1 };
+
   /**
    * Create an instance of the Ultrasonic Sensor.
    *
@@ -48,8 +51,9 @@ class Ultrasonic : public wpi::Sendable,
    * @param echoChannel The digital input channel that receives the echo. The
    *                    length of time that the echo is high represents the
    *                    round trip time of the ping, and the distance.
+   * @param units       The units returned in either kInches or kMilliMeters
    */
-  Ultrasonic(int pingChannel, int echoChannel);
+  Ultrasonic(int pingChannel, int echoChannel, DistanceUnit units = kInches);
 
   /**
    * Create an instance of an Ultrasonic Sensor from a DigitalInput for the echo
@@ -59,8 +63,10 @@ class Ultrasonic : public wpi::Sendable,
    *                    ping. Requires a 10uS pulse to start.
    * @param echoChannel The digital input object that times the return pulse to
    *                    determine the range.
+   * @param units       The units returned in either kInches or kMilliMeters
    */
-  Ultrasonic(DigitalOutput* pingChannel, DigitalInput* echoChannel);
+  Ultrasonic(DigitalOutput* pingChannel, DigitalInput* echoChannel,
+             DistanceUnit units = kInches);
 
   /**
    * Create an instance of an Ultrasonic Sensor from a DigitalInput for the echo
@@ -70,8 +76,10 @@ class Ultrasonic : public wpi::Sendable,
    *                    ping. Requires a 10uS pulse to start.
    * @param echoChannel The digital input object that times the return pulse to
    *                    determine the range.
+   * @param units       The units returned in either kInches or kMilliMeters
    */
-  Ultrasonic(DigitalOutput& pingChannel, DigitalInput& echoChannel);
+  Ultrasonic(DigitalOutput& pingChannel, DigitalInput& echoChannel,
+             DistanceUnit units = kInches);
 
   /**
    * Create an instance of an Ultrasonic Sensor from a DigitalInput for the echo
@@ -81,16 +89,16 @@ class Ultrasonic : public wpi::Sendable,
    *                    ping. Requires a 10uS pulse to start.
    * @param echoChannel The digital input object that times the return pulse to
    *                    determine the range.
+   * @param units       The units returned in either kInches or kMilliMeters
    */
   Ultrasonic(std::shared_ptr<DigitalOutput> pingChannel,
-             std::shared_ptr<DigitalInput> echoChannel);
+             std::shared_ptr<DigitalInput> echoChannel,
+             DistanceUnit units = kInches);
 
   ~Ultrasonic() override;
 
   Ultrasonic(Ultrasonic&&) = default;
   Ultrasonic& operator=(Ultrasonic&&) = default;
-
-  int GetEchoChannel() const;
 
   /**
    * Single ping to ultrasonic sensor.
@@ -127,19 +135,52 @@ class Ultrasonic : public wpi::Sendable,
   static void SetAutomaticMode(bool enabling);
 
   /**
-   * Get the range from the ultrasonic sensor.
+   * Get the range in inches from the ultrasonic sensor.
    *
-   * @return Range of the target returned from the ultrasonic sensor. If there
-   *         is no valid value yet, i.e. at least one measurement hasn't
-   *         completed, then return 0.
+   * @return Range in inches of the target returned from the ultrasonic sensor.
+   *         If there is no valid value yet, i.e. at least one measurement
+   *         hasn't completed, then return 0.
    */
-  units::meter_t GetRange() const;
+  double GetRangeInches() const;
+
+  /**
+   * Get the range in millimeters from the ultrasonic sensor.
+   *
+   * @return Range in millimeters of the target returned by the ultrasonic
+   *         sensor. If there is no valid value yet, i.e. at least one
+   *         measurement hasn't completed, then return 0.
+   */
+  double GetRangeMM() const;
 
   bool IsEnabled() const;
 
   void SetEnabled(bool enable);
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  /**
+   * Set the current DistanceUnit that should be used for the PIDSource base
+   * object.
+   *
+   * @param units The DistanceUnit that should be used.
+   */
+  void SetDistanceUnits(DistanceUnit units);
+
+  /**
+   * Get the current DistanceUnit that is used for the PIDSource base object.
+   *
+   * @return The type of DistanceUnit that is being used.
+   */
+  DistanceUnit GetDistanceUnits() const;
+
+  /**
+   * Get the range in the current DistanceUnit for the PIDSource base object.
+   *
+   * @return The range in DistanceUnit
+   */
+  double PIDGet() override;
+
+  void SetPIDSourceType(PIDSourceType pidSource) override;
+
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   /**
@@ -171,8 +212,8 @@ class Ultrasonic : public wpi::Sendable,
   static constexpr int kPriority = 64;
 
   // Max time (ms) between readings.
-  static constexpr auto kMaxUltrasonicTime = 0.1_s;
-  static constexpr auto kSpeedOfSound = 1130_fps;
+  static constexpr double kMaxUltrasonicTime = 0.1;
+  static constexpr double kSpeedOfSoundInchesPerSec = 1130.0 * 12.0;
 
   // Thread doing the round-robin automatic sensing
   static std::thread m_thread;
@@ -187,6 +228,7 @@ class Ultrasonic : public wpi::Sendable,
   std::shared_ptr<DigitalInput> m_echoChannel;
   bool m_enabled = false;
   Counter m_counter;
+  DistanceUnit m_units;
 
   hal::SimDevice m_simDevice;
   hal::SimBoolean m_simRangeValid;

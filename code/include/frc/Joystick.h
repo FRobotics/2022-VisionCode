@@ -54,6 +54,7 @@ class Joystick : public GenericHID {
   /**
    * Set the channel associated with the Y axis.
    *
+   * @param axis    The axis to set the channel for.
    * @param channel The channel to set the axis to.
    */
   void SetYChannel(int channel);
@@ -61,6 +62,7 @@ class Joystick : public GenericHID {
   /**
    * Set the channel associated with the Z axis.
    *
+   * @param axis    The axis to set the channel for.
    * @param channel The channel to set the axis to.
    */
   void SetZChannel(int channel);
@@ -68,6 +70,7 @@ class Joystick : public GenericHID {
   /**
    * Set the channel associated with the twist axis.
    *
+   * @param axis    The axis to set the channel for.
    * @param channel The channel to set the axis to.
    */
   void SetTwistChannel(int channel);
@@ -75,6 +78,7 @@ class Joystick : public GenericHID {
   /**
    * Set the channel associated with the throttle axis.
    *
+   * @param axis    The axis to set the channel for.
    * @param channel The channel to set the axis to.
    */
   void SetThrottleChannel(int channel);
@@ -115,18 +119,24 @@ class Joystick : public GenericHID {
   int GetThrottleChannel() const;
 
   /**
-   * Get the X value of the current joystick.
+   * Get the X value of the joystick.
    *
    * This depends on the mapping of the joystick connected to the current port.
+   *
+   * @param hand This parameter is ignored for the Joystick class and is only
+   *             here to complete the GenericHID interface.
    */
-  double GetX() const;
+  double GetX(JoystickHand hand = kRightHand) const override;
 
   /**
-   * Get the Y value of the current joystick.
+   * Get the Y value of the joystick.
    *
    * This depends on the mapping of the joystick connected to the current port.
+   *
+   * @param hand This parameter is ignored for the Joystick class and is only
+   *             here to complete the GenericHID interface.
    */
-  double GetY() const;
+  double GetY(JoystickHand hand = kRightHand) const override;
 
   /**
    * Get the Z value of the current joystick.

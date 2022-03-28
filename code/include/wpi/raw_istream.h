@@ -10,12 +10,13 @@
 #include <algorithm>
 #include <cstddef>
 #include <string>
-#include <string_view>
 #include <system_error>
 #include <vector>
 
+#include "wpi/ArrayRef.h"
 #include "wpi/SmallVector.h"
-#include "wpi/span.h"
+#include "wpi/StringRef.h"
+#include "wpi/Twine.h"
 
 namespace wpi {
 
@@ -99,7 +100,7 @@ class raw_istream {
   // @param buf Buffer for output
   // @param maxLen Maximum length
   // @return Line
-  std::string_view getline(SmallVectorImpl<char>& buf, int maxLen);
+  StringRef getline(SmallVectorImpl<char>& buf, int maxLen);
 
   virtual void close() = 0;
 
@@ -133,9 +134,9 @@ class raw_mem_istream : public raw_istream {
   // not const as we don't want to allow temporaries
   explicit raw_mem_istream(std::string& str)
       : raw_mem_istream(str.data(), str.size()) {}
-  explicit raw_mem_istream(span<const char> mem)
+  explicit raw_mem_istream(ArrayRef<char> mem)
       : raw_mem_istream(mem.data(), mem.size()) {}
-  explicit raw_mem_istream(span<const uint8_t> mem)
+  explicit raw_mem_istream(ArrayRef<uint8_t> mem)
       : raw_mem_istream(reinterpret_cast<const char*>(mem.data()), mem.size()) {
   }
   explicit raw_mem_istream(const char* str)
@@ -153,7 +154,7 @@ class raw_mem_istream : public raw_istream {
 
 class raw_fd_istream : public raw_istream {
  public:
-  raw_fd_istream(std::string_view filename, std::error_code& ec,
+  raw_fd_istream(const Twine& filename, std::error_code& ec,
                  size_t bufSize = 4096);
   raw_fd_istream(int fd, bool shouldClose, size_t bufSize = 4096);
   ~raw_fd_istream() override;

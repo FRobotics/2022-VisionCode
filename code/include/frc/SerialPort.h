@@ -5,10 +5,13 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <hal/Types.h>
-#include <units/time.h>
+#include <wpi/StringRef.h>
+#include <wpi/Twine.h>
+#include <wpi/deprecated.h>
+
+#include "frc/ErrorBase.h"
 
 namespace frc {
 
@@ -24,7 +27,7 @@ namespace frc {
  * and the NI-VISA Programmer's Reference Manual here:
  *   http://www.ni.com/pdf/manuals/370132c.pdf
  */
-class SerialPort {
+class SerialPort : public ErrorBase {
  public:
   enum Parity {
     kParity_None = 0,
@@ -81,11 +84,11 @@ class SerialPort {
    * @param stopBits The number of stop bits to use as defined by the enum
    *                 StopBits.
    */
-  SerialPort(int baudRate, std::string_view portName, Port port = kOnboard,
+  SerialPort(int baudRate, const wpi::Twine& portName, Port port = kOnboard,
              int dataBits = 8, Parity parity = kParity_None,
              StopBits stopBits = kStopBits_One);
 
-  ~SerialPort();
+  ~SerialPort() override;
 
   SerialPort(SerialPort&& rhs) = default;
   SerialPort& operator=(SerialPort&& rhs) = default;
@@ -144,10 +147,10 @@ class SerialPort {
    * Use Write({data, len}) to get a buffer that is shorter than the length of
    * the string.
    *
-   * @param buffer the buffer to read the bytes from.
+   * @param buffer StringRef to the buffer to read the bytes from.
    * @return The number of bytes actually written into the port.
    */
-  int Write(std::string_view buffer);
+  int Write(wpi::StringRef buffer);
 
   /**
    * Configure the timeout of the serial port.
@@ -155,9 +158,9 @@ class SerialPort {
    * This defines the timeout for transactions with the hardware.
    * It will affect reads and very large writes.
    *
-   * @param timeout The time to wait for I/O.
+   * @param timeout The number of seconds to to wait for I/O.
    */
-  void SetTimeout(units::second_t timeout);
+  void SetTimeout(double timeout);
 
   /**
    * Specify the size of the input buffer.

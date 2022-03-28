@@ -5,11 +5,11 @@
 #ifndef WPIUTIL_WPI_MIMETYPES_H_
 #define WPIUTIL_WPI_MIMETYPES_H_
 
-#include <string_view>
+#include "wpi/StringRef.h"
 
 namespace wpi {
 
-std::string_view MimeTypeFromPath(std::string_view path);
+StringRef MimeTypeFromPath(StringRef path);
 
 }  // namespace wpi
 

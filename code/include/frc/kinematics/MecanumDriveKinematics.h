@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
-
 #include "Eigen/Core"
 #include "Eigen/QR"
 #include "frc/geometry/Translation2d.h"
@@ -37,7 +35,7 @@ namespace frc {
  * Forward kinematics is also used for odometry -- determining the position of
  * the robot on the field using encoders and a gyro.
  */
-class WPILIB_DLLEXPORT MecanumDriveKinematics {
+class MecanumDriveKinematics {
  public:
   /**
    * Constructs a mecanum drive kinematics object.

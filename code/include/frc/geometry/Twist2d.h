@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
-
 #include "units/angle.h"
 #include "units/length.h"
 #include "units/math.h"
@@ -18,7 +16,7 @@ namespace frc {
  *
  * A Twist can be used to represent a difference between two poses.
  */
-struct WPILIB_DLLEXPORT Twist2d {
+struct Twist2d {
   /**
    * Linear "dx" component
    */
@@ -53,15 +51,5 @@ struct WPILIB_DLLEXPORT Twist2d {
    * @return Whether the two objects are not equal.
    */
   bool operator!=(const Twist2d& other) const { return !operator==(other); }
-
-  /**
-   * Scale this by a given factor.
-   *
-   * @param factor The factor by which to scale.
-   * @return The scaled Twist2d.
-   */
-  Twist2d operator*(double factor) const {
-    return Twist2d{dx * factor, dy * factor, dtheta * factor};
-  }
 };
 }  // namespace frc

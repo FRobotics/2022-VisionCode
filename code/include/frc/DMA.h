@@ -5,7 +5,8 @@
 #pragma once
 
 #include <hal/Types.h>
-#include <units/time.h>
+
+#include "frc/ErrorBase.h"
 
 namespace frc {
 class Encoder;
@@ -14,22 +15,19 @@ class DigitalSource;
 class DutyCycle;
 class AnalogInput;
 class DMASample;
-class PWM;
-class PWMMotorController;
 
-class DMA {
+class DMA : public ErrorBase {
   friend class DMASample;
 
  public:
   DMA();
-  ~DMA();
+  ~DMA() override;
 
   DMA& operator=(DMA&& other) = default;
   DMA(DMA&& other) = default;
 
   void SetPause(bool pause);
-  void SetTimedTrigger(units::second_t seconds);
-  void SetTimedTriggerCycles(int cycles);
+  void SetRate(int cycles);
 
   void AddEncoder(const Encoder* encoder);
   void AddEncoderPeriod(const Encoder* encoder);
@@ -45,15 +43,10 @@ class DMA {
   void AddAveragedAnalogInput(const AnalogInput* analogInput);
   void AddAnalogAccumulator(const AnalogInput* analogInput);
 
-  int SetExternalTrigger(DigitalSource* source, bool rising, bool falling);
-  int SetPwmEdgeTrigger(PWM* pwm, bool rising, bool falling);
-  int SetPwmEdgeTrigger(PWMMotorController* pwm, bool rising, bool falling);
+  void SetExternalTrigger(DigitalSource* source, bool rising, bool falling);
 
-  void ClearSensors();
-  void ClearExternalTriggers();
-
-  void Start(int queueDepth);
-  void Stop();
+  void StartDMA(int queueDepth);
+  void StopDMA();
 
  private:
   hal::Handle<HAL_DMAHandle> dmaHandle;

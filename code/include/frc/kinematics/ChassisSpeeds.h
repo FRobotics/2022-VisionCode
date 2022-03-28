@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
-
 #include "frc/geometry/Rotation2d.h"
 #include "units/angular_velocity.h"
 #include "units/velocity.h"
@@ -22,7 +20,7 @@ namespace frc {
  * never have a dy component because it can never move sideways. Holonomic
  * drivetrains such as swerve and mecanum will often have all three components.
  */
-struct WPILIB_DLLEXPORT ChassisSpeeds {
+struct ChassisSpeeds {
   /**
    * Represents forward velocity w.r.t the robot frame of reference. (Fwd is +)
    */

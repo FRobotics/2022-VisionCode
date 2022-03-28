@@ -9,11 +9,12 @@
 #include <hal/SimDevice.h>
 #include <hal/Types.h>
 #include <units/angle.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
 #include "frc/AnalogTrigger.h"
 #include "frc/Counter.h"
+#include "frc/ErrorBase.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 class DutyCycle;
@@ -24,8 +25,9 @@ class DigitalSource;
  * PWM Output, the CTRE Mag Encoder, the Rev Hex Encoder, and the AM Mag
  * Encoder.
  */
-class DutyCycleEncoder : public wpi::Sendable,
-                         public wpi::SendableHelper<DutyCycleEncoder> {
+class DutyCycleEncoder : public ErrorBase,
+                         public Sendable,
+                         public SendableHelper<DutyCycleEncoder> {
  public:
   /**
    * Construct a new DutyCycleEncoder on a specific channel.
@@ -58,21 +60,21 @@ class DutyCycleEncoder : public wpi::Sendable,
   /**
    * Construct a new DutyCycleEncoder attached to a DigitalSource object.
    *
-   * @param digitalSource the digital source to attach to
+   * @param source the digital source to attach to
    */
   explicit DutyCycleEncoder(DigitalSource& digitalSource);
 
   /**
    * Construct a new DutyCycleEncoder attached to a DigitalSource object.
    *
-   * @param digitalSource the digital source to attach to
+   * @param source the digital source to attach to
    */
   explicit DutyCycleEncoder(DigitalSource* digitalSource);
 
   /**
    * Construct a new DutyCycleEncoder attached to a DigitalSource object.
    *
-   * @param digitalSource the digital source to attach to
+   * @param source the digital source to attach to
    */
   explicit DutyCycleEncoder(std::shared_ptr<DigitalSource> digitalSource);
 
@@ -122,55 +124,6 @@ class DutyCycleEncoder : public wpi::Sendable,
   units::turn_t Get() const;
 
   /**
-   * Get the absolute position of the duty cycle encoder encoder.
-   *
-   * <p>GetAbsolutePosition() - GetPositionOffset() will give an encoder
-   * absolute position relative to the last reset. This could potentially be
-   * negative, which needs to be accounted for.
-   *
-   * <p>This will not account for rollovers, and will always be just the raw
-   * absolute position.
-   *
-   * @return the absolute position
-   */
-  double GetAbsolutePosition() const;
-
-  /**
-   * Get the offset of position relative to the last reset.
-   *
-   * GetAbsolutePosition() - GetPositionOffset() will give an encoder absolute
-   * position relative to the last reset. This could potentially be negative,
-   * which needs to be accounted for.
-   *
-   * @return the position offset
-   */
-  double GetPositionOffset() const;
-
-  /**
-   * Set the position offset.
-   *
-   * <p>This must be in the range of 0-1.
-   *
-   * @param offset the offset
-   */
-  void SetPositionOffset(double offset);
-
-  /**
-   * Set the encoder duty cycle range. As the encoder needs to maintain a duty
-   * cycle, the duty cycle cannot go all the way to 0% or all the way to 100%.
-   * For example, an encoder with a 4096 us period might have a minimum duty
-   * cycle of 1 us / 4096 us and a maximum duty cycle of 4095 / 4096 us. Setting
-   * the range will result in an encoder duty cycle less than or equal to the
-   * minimum being output as 0 rotation, the duty cycle greater than or equal to
-   * the maximum being output as 1 rotation, and values in between linearly
-   * scaled from 0 to 1.
-   *
-   * @param min minimum duty cycle (0-1 range)
-   * @param max maximum duty cycle (0-1 range)
-   */
-  void SetDutyCycleRange(double min, double max);
-
-  /**
    * Set the distance per rotation of the encoder. This sets the multiplier used
    * to determine the distance driven based on the rotation value from the
    * encoder. Set this value based on the how far the mechanism travels in 1
@@ -212,11 +165,10 @@ class DutyCycleEncoder : public wpi::Sendable,
    */
   int GetSourceChannel() const;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   void Init();
-  double MapSensorRange(double pos) const;
 
   std::shared_ptr<DutyCycle> m_dutyCycle;
   std::unique_ptr<AnalogTrigger> m_analogTrigger;
@@ -225,12 +177,9 @@ class DutyCycleEncoder : public wpi::Sendable,
   double m_positionOffset = 0;
   double m_distancePerRotation = 1.0;
   mutable units::turn_t m_lastPosition{0.0};
-  double m_sensorMin = 0;
-  double m_sensorMax = 1;
 
   hal::SimDevice m_simDevice;
   hal::SimDouble m_simPosition;
-  hal::SimDouble m_simAbsolutePosition;
   hal::SimDouble m_simDistancePerRotation;
   hal::SimBoolean m_simIsConnected;
 };

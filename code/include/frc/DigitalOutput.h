@@ -5,12 +5,14 @@
 #pragma once
 
 #include <hal/Types.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
 #include "frc/DigitalSource.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
+
+class SendableBuilder;
 
 /**
  * Class to write to digital outputs.
@@ -20,8 +22,8 @@ namespace frc {
  * shouldn't be done here.
  */
 class DigitalOutput : public DigitalSource,
-                      public wpi::Sendable,
-                      public wpi::SendableHelper<DigitalOutput> {
+                      public Sendable,
+                      public SendableHelper<DigitalOutput> {
  public:
   /**
    * Create an instance of a digital output.
@@ -143,7 +145,7 @@ class DigitalOutput : public DigitalSource,
    */
   void SetSimDevice(HAL_SimDeviceHandle device);
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   int m_channel;

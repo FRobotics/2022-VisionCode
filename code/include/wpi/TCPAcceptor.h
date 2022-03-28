@@ -27,7 +27,6 @@
 #include <atomic>
 #include <memory>
 #include <string>
-#include <string_view>
 
 #include "wpi/NetworkAcceptor.h"
 #include "wpi/TCPStream.h"
@@ -45,7 +44,7 @@ class TCPAcceptor : public NetworkAcceptor {
   Logger& m_logger;
 
  public:
-  TCPAcceptor(int port, std::string_view address, Logger& logger);
+  TCPAcceptor(int port, const char* address, Logger& logger);
   ~TCPAcceptor() override;
 
   int start() override;

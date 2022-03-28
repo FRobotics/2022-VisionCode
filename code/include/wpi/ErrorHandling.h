@@ -17,9 +17,11 @@
 
 #include "wpi/Compiler.h"
 #include <string>
-#include <string_view>
 
 namespace wpi {
+class StringRef;
+  class Twine;
+
   /// An error handler callback.
   typedef void (*fatal_error_handler_t)(void *user_data,
                                         const std::string& reason,
@@ -71,7 +73,9 @@ LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const char *reason,
                                                 bool gen_crash_diag = true);
 LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const std::string &reason,
                                                 bool gen_crash_diag = true);
-LLVM_ATTRIBUTE_NORETURN void report_fatal_error(std::string_view reason,
+LLVM_ATTRIBUTE_NORETURN void report_fatal_error(StringRef reason,
+                                                bool gen_crash_diag = true);
+LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const Twine &reason,
                                                 bool gen_crash_diag = true);
 
 /// Installs a new bad alloc error handler that should be used whenever a

@@ -7,20 +7,18 @@
 #include <functional>
 #include <limits>
 
-#include <wpi/SymbolExports.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
+#include <units/time.h>
 
-#include "units/time.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc2 {
 
 /**
  * Implements a PID control loop.
  */
-class WPILIB_DLLEXPORT PIDController
-    : public wpi::Sendable,
-      public wpi::SendableHelper<PIDController> {
+class PIDController : public frc::Sendable,
+                      public frc::SendableHelper<PIDController> {
  public:
   /**
    * Allocates a PIDController with the given constants for Kp, Ki, and Kd.
@@ -159,7 +157,7 @@ class WPILIB_DLLEXPORT PIDController
    * Sets the error which is considered tolerable for use with AtSetpoint().
    *
    * @param positionTolerance Position error which is tolerable.
-   * @param velocityTolerance Velocity error which is tolerable.
+   * @param velociytTolerance Velocity error which is tolerable.
    */
   void SetTolerance(
       double positionTolerance,
@@ -195,7 +193,7 @@ class WPILIB_DLLEXPORT PIDController
    */
   void Reset();
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(frc::SendableBuilder& builder) override;
 
  private:
   // Factor for "proportional" control
@@ -241,9 +239,3 @@ class WPILIB_DLLEXPORT PIDController
 };
 
 }  // namespace frc2
-
-namespace frc {
-
-using frc2::PIDController;
-
-}  // namespace frc

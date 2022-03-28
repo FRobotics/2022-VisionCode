@@ -34,18 +34,15 @@ namespace frc {
  * never call it, then this class will behave mostly like regular encoder
  * odometry.
  *
- * The state-space system used internally has the following states (x), inputs
- * (u), and outputs (y):
+ * Our state-space system is:
  *
- * <strong> x = [x, y, theta]ᵀ </strong> in the field coordinate system
- * containing x position, y position, and heading.
+ * <strong> x = [[x, y, theta]]^T </strong> in the
+ * field-coordinate system.
  *
- * <strong> u = [v_x, v_y, omega]ᵀ </strong> containing x velocity, y velocity,
- * and angular velocity in the field coordinate system.
+ * <strong> u = [[vx, vy, omega]]^T </strong> in the field-coordinate system.
  *
- * <strong> y = [x, y, theta]ᵀ </strong> from vision containing x position, y
- * position, and heading; or <strong> y = [theta]ᵀ </strong> containing gyro
- * heading.
+ * <strong> y = [[x, y, theta]]^T </strong> in field coords from vision,
+ * or <strong> y = [[theta]]^T </strong> from the gyro.
  */
 template <size_t NumModules>
 class SwerveDrivePoseEstimator {
@@ -54,13 +51,13 @@ class SwerveDrivePoseEstimator {
    * Constructs a SwerveDrivePoseEstimator.
    *
    * @param gyroAngle                The current gyro angle.
-   * @param initialPose              The starting pose estimate.
+   * @param initialPoseMeters        The starting pose estimate.
    * @param kinematics               A correctly-configured kinematics object
    *                                 for your drivetrain.
    * @param stateStdDevs             Standard deviations of model states.
    *                                 Increase these numbers to trust your
    *                                 model's state estimates less. This matrix
-   *                                 is in the form [x, y, theta]ᵀ, with units
+   *                                 is in the form [x, y, theta]^T, with units
    *                                 in meters and radians.
    * @param localMeasurementStdDevs  Standard deviations of the encoder and gyro
    *                                 measurements. Increase these numbers to
@@ -71,7 +68,7 @@ class SwerveDrivePoseEstimator {
    *                                 measurements. Increase these numbers to
    *                                 trust global measurements from vision
    *                                 less. This matrix is in the form
-   *                                 [x, y, theta]ᵀ, with units in meters and
+   *                                 [x, y, theta]^T, with units in meters and
    *                                 radians.
    * @param nominalDt                The time in seconds between each robot
    *                                 loop.
@@ -83,10 +80,10 @@ class SwerveDrivePoseEstimator {
       const wpi::array<double, 1>& localMeasurementStdDevs,
       const wpi::array<double, 3>& visionMeasurementStdDevs,
       units::second_t nominalDt = 0.02_s)
-      : m_observer([](const Eigen::Vector<double, 3>& x,
-                      const Eigen::Vector<double, 3>& u) { return u; },
-                   [](const Eigen::Vector<double, 3>& x,
-                      const Eigen::Vector<double, 3>& u) {
+      : m_observer([](const Eigen::Matrix<double, 3, 1>& x,
+                      const Eigen::Matrix<double, 3, 1>& u) { return u; },
+                   [](const Eigen::Matrix<double, 3, 1>& x,
+                      const Eigen::Matrix<double, 3, 1>& u) {
                      return x.block<1, 1>(2, 0);
                    },
                    stateStdDevs, localMeasurementStdDevs,
@@ -98,13 +95,13 @@ class SwerveDrivePoseEstimator {
     SetVisionMeasurementStdDevs(visionMeasurementStdDevs);
 
     // Create correction mechanism for vision measurements.
-    m_visionCorrect = [&](const Eigen::Vector<double, 3>& u,
-                          const Eigen::Vector<double, 3>& y) {
+    m_visionCorrect = [&](const Eigen::Matrix<double, 3, 1>& u,
+                          const Eigen::Matrix<double, 3, 1>& y) {
       m_observer.Correct<3>(
           u, y,
-          [](const Eigen::Vector<double, 3>& x,
-             const Eigen::Vector<double, 3>& u) { return x; },
-          m_visionContR, frc::AngleMean<3, 3>(2), frc::AngleResidual<3>(2),
+          [](const Eigen::Matrix<double, 3, 1>& x,
+             const Eigen::Matrix<double, 3, 1>& u) { return x; },
+          m_visionDiscR, frc::AngleMean<3, 3>(2), frc::AngleResidual<3>(2),
           frc::AngleResidual<3>(2), frc::AngleAdd<3>(2));
     };
 
@@ -128,12 +125,10 @@ class SwerveDrivePoseEstimator {
    * @param gyroAngle The angle reported by the gyroscope.
    */
   void ResetPosition(const Pose2d& pose, const Rotation2d& gyroAngle) {
-    // Reset state estimate and error covariance
-    m_observer.Reset();
-    m_latencyCompensator.Reset();
-
+    // Set observer state.
     m_observer.SetXhat(PoseTo3dVector(pose));
 
+    // Calculate offsets.
     m_gyroOffset = pose.Rotation() - gyroAngle;
     m_previousAngle = pose.Rotation();
   }
@@ -158,13 +153,15 @@ class SwerveDrivePoseEstimator {
    *                                 measurements. Increase these numbers to
    *                                 trust global measurements from vision
    *                                 less. This matrix is in the form
-   *                                 [x, y, theta]ᵀ, with units in meters and
+   *                                 [x, y, theta]^T, with units in meters and
    *                                 radians.
    */
   void SetVisionMeasurementStdDevs(
       const wpi::array<double, 3>& visionMeasurementStdDevs) {
     // Create R (covariances) for vision measurements.
-    m_visionContR = frc::MakeCovMatrix(visionMeasurementStdDevs);
+    Eigen::Matrix<double, 3, 3> visionContR =
+        frc::MakeCovMatrix(visionMeasurementStdDevs);
+    m_visionDiscR = frc::DiscretizeR<3>(visionContR, m_nominalDt);
   }
 
   /**
@@ -187,7 +184,7 @@ class SwerveDrivePoseEstimator {
    */
   void AddVisionMeasurement(const Pose2d& visionRobotPose,
                             units::second_t timestamp) {
-    m_latencyCompensator.ApplyPastGlobalMeasurement<3>(
+    m_latencyCompensator.ApplyPastMeasurement<3>(
         &m_observer, m_nominalDt, PoseTo3dVector(visionRobotPose),
         m_visionCorrect, timestamp);
   }
@@ -212,15 +209,15 @@ class SwerveDrivePoseEstimator {
    *                                 timestamp with an epoch since FPGA startup
    *                                 (i.e. the epoch of this timestamp is the
    *                                 same epoch as
-   *                                 frc::Timer::GetFPGATimestamp(). This means
+   *                                 frc2::Timer::GetFPGATimestamp(). This means
    *                                 that you should use
-   *                                 frc::Timer::GetFPGATimestamp() as your
+   *                                 frc2::Timer::GetFPGATimestamp() as your
    *                                 time source in this case.
    * @param visionMeasurementStdDevs Standard deviations of the vision
    *                                 measurements. Increase these numbers to
    *                                 trust global measurements from vision
    *                                 less. This matrix is in the form
-   *                                 [x, y, theta]ᵀ, with units in meters and
+   *                                 [x, y, theta]^T, with units in meters and
    *                                 radians.
    */
   void AddVisionMeasurement(
@@ -272,10 +269,12 @@ class SwerveDrivePoseEstimator {
         Translation2d(chassisSpeeds.vx * 1_s, chassisSpeeds.vy * 1_s)
             .RotateBy(angle);
 
-    Eigen::Vector<double, 3> u{fieldRelativeSpeeds.X().value(),
-                               fieldRelativeSpeeds.Y().value(), omega.value()};
+    auto u =
+        frc::MakeMatrix<3, 1>(fieldRelativeSpeeds.X().template to<double>(),
+                              fieldRelativeSpeeds.Y().template to<double>(),
+                              omega.template to<double>());
 
-    Eigen::Vector<double, 1> localY{angle.Radians().value()};
+    auto localY = frc::MakeMatrix<1, 1>(angle.Radians().template to<double>());
     m_previousAngle = angle;
 
     m_latencyCompensator.AddObserverState(m_observer, u, localY, currentTime);
@@ -291,11 +290,11 @@ class SwerveDrivePoseEstimator {
   SwerveDriveKinematics<NumModules>& m_kinematics;
   KalmanFilterLatencyCompensator<3, 3, 1, UnscentedKalmanFilter<3, 3, 1>>
       m_latencyCompensator;
-  std::function<void(const Eigen::Vector<double, 3>& u,
-                     const Eigen::Vector<double, 3>& y)>
+  std::function<void(const Eigen::Matrix<double, 3, 1>& u,
+                     const Eigen::Matrix<double, 3, 1>& y)>
       m_visionCorrect;
 
-  Eigen::Matrix3d m_visionContR;
+  Eigen::Matrix3d m_visionDiscR;
 
   units::second_t m_nominalDt;
   units::second_t m_prevTime = -1_s;
@@ -305,7 +304,7 @@ class SwerveDrivePoseEstimator {
 
   template <int Dim>
   static wpi::array<double, Dim> StdDevMatrixToArray(
-      const Eigen::Vector<double, Dim>& vector) {
+      const Eigen::Matrix<double, Dim, 1>& vector) {
     wpi::array<double, Dim> array;
     for (size_t i = 0; i < Dim; ++i) {
       array[i] = vector(i);

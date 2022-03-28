@@ -43,19 +43,18 @@ extern "C" {
 /**
  * Initializes an encoder.
  *
- * @param[in] digitalSourceHandleA the A source (either a HAL_DigitalHandle or a
- *                                 HAL_AnalogTriggerHandle)
- * @param[in] analogTriggerTypeA   the analog trigger type of the A source if it
- *                                 is an analog trigger
- * @param[in] digitalSourceHandleB the B source (either a HAL_DigitalHandle or a
- *                                 HAL_AnalogTriggerHandle)
- * @param[in] analogTriggerTypeB   the analog trigger type of the B source if it
- *                                 is an analog trigger
- * @param[in] reverseDirection     true to reverse the counting direction from
- *                                 standard, otherwise false
- * @param[in] encodingType         the encoding type
- * @param[out] status              Error status variable. 0 on success.
- * @return the created encoder handle
+ * @param digitalSourceHandleA the A source (either a HAL_DigitalHandle or a
+ * HAL_AnalogTriggerHandle)
+ * @param analogTriggerTypeA   the analog trigger type of the A source if it is
+ * an analog trigger
+ * @param digitalSourceHandleB the B source (either a HAL_DigitalHandle or a
+ * HAL_AnalogTriggerHandle)
+ * @param analogTriggerTypeB   the analog trigger type of the B source if it is
+ * an analog trigger
+ * @param reverseDirection     true to reverse the counting direction from
+ * standard, otherwise false
+ * @param encodingType         the encoding type
+   @return                     the created encoder handle
  */
 HAL_EncoderHandle HAL_InitializeEncoder(
     HAL_Handle digitalSourceHandleA, HAL_AnalogTriggerType analogTriggerTypeA,
@@ -66,8 +65,7 @@ HAL_EncoderHandle HAL_InitializeEncoder(
 /**
  * Frees an encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status Error status variable. 0 on success.
+ * @param encoderHandle the encoder handle
  */
 void HAL_FreeEncoder(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -85,8 +83,7 @@ void HAL_SetEncoderSimDevice(HAL_EncoderHandle handle,
  *
  * This is scaled by the value passed duing initialization to encodingType.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status Error status variable. 0 on success.
+ * @param encoderHandle the encoder handle
  * @return the current scaled count
  */
 int32_t HAL_GetEncoder(HAL_EncoderHandle encoderHandle, int32_t* status);
@@ -96,9 +93,8 @@ int32_t HAL_GetEncoder(HAL_EncoderHandle encoderHandle, int32_t* status);
  *
  * This is not scaled by any values.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status Error status variable. 0 on success.
- * @return the raw encoder count
+ * @param encoderHandle the encoder handle
+ * @return              the raw encoder count
  */
 int32_t HAL_GetEncoderRaw(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -107,9 +103,8 @@ int32_t HAL_GetEncoderRaw(HAL_EncoderHandle encoderHandle, int32_t* status);
  *
  * This is set by the value passed during initialization to encodingType.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the encoder scale value
+ * @param encoderHandle the encoder handle
+ * @return              the encoder scale value
  */
 int32_t HAL_GetEncoderEncodingScale(HAL_EncoderHandle encoderHandle,
                                     int32_t* status);
@@ -120,8 +115,8 @@ int32_t HAL_GetEncoderEncodingScale(HAL_EncoderHandle encoderHandle,
  * Read the value at this instant. It may still be running, so it reflects the
  * current value. Next time it is read, it might have a different value.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
+ * @param encoderHandle the encoder handle
+ * @return              the current encoder value
  */
 void HAL_ResetEncoder(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -131,9 +126,8 @@ void HAL_ResetEncoder(HAL_EncoderHandle encoderHandle, int32_t* status);
  * Returns the time interval of the most recent count. This can be used for
  * velocity calculations to determine shaft speed.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @returns the period of the last two pulses in units of seconds
+ * @param encoderHandle the encoder handle
+ * @returns             the period of the last two pulses in units of seconds
  */
 double HAL_GetEncoderPeriod(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -144,10 +138,9 @@ double HAL_GetEncoderPeriod(HAL_EncoderHandle encoderHandle, int32_t* status);
  * used to determine the "stopped" state of the encoder using the
  * HAL_GetEncoderStopped method.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[in] maxPeriod     the maximum period where the counted device is
- *                          considered moving in seconds
- * @param[out] status       Error status variable. 0 on success.
+ * @param encoderHandle the encoder handle
+ * @param maxPeriod     the maximum period where the counted device is
+ * considered moving in seconds
  */
 void HAL_SetEncoderMaxPeriod(HAL_EncoderHandle encoderHandle, double maxPeriod,
                              int32_t* status);
@@ -159,10 +152,9 @@ void HAL_SetEncoderMaxPeriod(HAL_EncoderHandle encoderHandle, double maxPeriod,
  * using the SetMaxPeriod method. If the clock exceeds the MaxPeriod, then the
  * device (and encoder) are assumed to be stopped and it returns true.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return true if the most recent encoder period exceeds the MaxPeriod value
- *         set by SetMaxPeriod
+ * @param encoderHandle the encoder handle
+ * @return              true if the most recent encoder period exceeds the
+ * MaxPeriod value set by SetMaxPeriod
  */
 HAL_Bool HAL_GetEncoderStopped(HAL_EncoderHandle encoderHandle,
                                int32_t* status);
@@ -170,9 +162,8 @@ HAL_Bool HAL_GetEncoderStopped(HAL_EncoderHandle encoderHandle,
 /**
  * Gets the last direction the encoder value changed.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the last direction the encoder value changed
+ * @param encoderHandle the encoder handle
+ * @return              the last direction the encoder value changed
  */
 HAL_Bool HAL_GetEncoderDirection(HAL_EncoderHandle encoderHandle,
                                  int32_t* status);
@@ -183,10 +174,9 @@ HAL_Bool HAL_GetEncoderDirection(HAL_EncoderHandle encoderHandle,
  * This is the encoder count scaled by the distance per pulse set for the
  * encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the encoder distance (units are determined by the units
- *                      passed to HAL_SetEncoderDistancePerPulse)
+ * @param encoderHandle the encoder handle
+ * @return              the encoder distance (units are determined by the units
+ * passed to HAL_SetEncoderDistancePerPulse)
  */
 double HAL_GetEncoderDistance(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -196,10 +186,9 @@ double HAL_GetEncoderDistance(HAL_EncoderHandle encoderHandle, int32_t* status);
  * This is the encoder period scaled by the distance per pulse set for the
  * encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the encoder rate (units are determined by the units passed to
- *         HAL_SetEncoderDistancePerPulse, time value is seconds)
+ * @param encoderHandle the encoder handle
+ * @return              the encoder rate (units are determined by the units
+ * passed to HAL_SetEncoderDistancePerPulse, time value is seconds)
  */
 double HAL_GetEncoderRate(HAL_EncoderHandle encoderHandle, int32_t* status);
 
@@ -209,12 +198,10 @@ double HAL_GetEncoderRate(HAL_EncoderHandle encoderHandle, int32_t* status);
  * Units need to match what is set by HAL_SetEncoderDistancePerPulse, with time
  * as seconds.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[in] minRate       the minimum rate to be considered moving (units are
- *                          determined by the units passed to
- *                          HAL_SetEncoderDistancePerPulse, time value is
- *                          seconds)
- * @param[out] status       Error status variable. 0 on success.
+ * @param encoderHandle the encoder handle
+ * @param minRate       the minimum rate to be considered moving (units are
+ * determined by the units passed to HAL_SetEncoderDistancePerPulse, time value
+ * is seconds)
  */
 void HAL_SetEncoderMinRate(HAL_EncoderHandle encoderHandle, double minRate,
                            int32_t* status);
@@ -223,10 +210,9 @@ void HAL_SetEncoderMinRate(HAL_EncoderHandle encoderHandle, double minRate,
  * Sets the distance traveled per encoder pulse. This is used as a scaling
  * factor for the rate and distance calls.
  *
- * @param[in] encoderHandle    the encoder handle
- * @param[in] distancePerPulse the distance traveled per encoder pulse (units
- *                             user defined)
- * @param[out] status          Error status variable. 0 on success.
+ * @param encoderHandle    the encoder handle
+ * @param distancePerPulse the distance traveled per encoder pulse (units user
+ * defined)
  */
 void HAL_SetEncoderDistancePerPulse(HAL_EncoderHandle encoderHandle,
                                     double distancePerPulse, int32_t* status);
@@ -236,9 +222,8 @@ void HAL_SetEncoderDistancePerPulse(HAL_EncoderHandle encoderHandle,
  *
  * Note that this is not a toggle. It is an absolute set.
  *
- * @param[in] encoderHandle    the encoder handle
- * @param[in] reverseDirection true to reverse the direction, false to not.
- * @param[out] status          Error status variable. 0 on success.
+ * @param encoderHandle    the encoder handle
+ * @param reverseDirection true to reverse the direction, false to not.
  */
 void HAL_SetEncoderReverseDirection(HAL_EncoderHandle encoderHandle,
                                     HAL_Bool reverseDirection, int32_t* status);
@@ -246,9 +231,8 @@ void HAL_SetEncoderReverseDirection(HAL_EncoderHandle encoderHandle,
 /**
  * Sets the number of encoder samples to average when calculating encoder rate.
  *
- * @param[in] encoderHandle    the encoder handle
- * @param[in] samplesToAverage the number of samples to average
- * @param[out] status          Error status variable. 0 on success.
+ * @param encoderHandle    the encoder handle
+ * @param samplesToAverage the number of samples to average
  */
 void HAL_SetEncoderSamplesToAverage(HAL_EncoderHandle encoderHandle,
                                     int32_t samplesToAverage, int32_t* status);
@@ -256,9 +240,8 @@ void HAL_SetEncoderSamplesToAverage(HAL_EncoderHandle encoderHandle,
 /**
  * Gets the current samples to average value.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the current samples to average value
+ * @param encoderHandle the encoder handle
+ * @return              the current samples to average value
  */
 int32_t HAL_GetEncoderSamplesToAverage(HAL_EncoderHandle encoderHandle,
                                        int32_t* status);
@@ -269,14 +252,12 @@ int32_t HAL_GetEncoderSamplesToAverage(HAL_EncoderHandle encoderHandle,
  * The index pulse can be used to cause an encoder to reset based on an external
  * input.
  *
- * @param[in] encoderHandle       the encoder handle
- * @param[in] digitalSourceHandle the index source handle (either a
- *                                HAL_AnalogTriggerHandle or a
- *                                HAL_DigitalHandle)
- * @param[in] analogTriggerType   the analog trigger type if the source is an
- *                                analog trigger
- * @param[in] type                the index triggering type
- * @param[out] status             Error status variable. 0 on success.
+ * @param encoderHandle       the encoder handle
+ * @param digitalSourceHandle the index source handle (either a
+ * HAL_AnalogTriggerHandle of a HAL_DigitalHandle)
+ * @param analogTriggerType   the analog trigger type if the source is an analog
+ * trigger
+ * @param type                the index triggering type
  */
 void HAL_SetEncoderIndexSource(HAL_EncoderHandle encoderHandle,
                                HAL_Handle digitalSourceHandle,
@@ -286,9 +267,8 @@ void HAL_SetEncoderIndexSource(HAL_EncoderHandle encoderHandle,
 /**
  * Gets the FPGA index of the encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the FPGA index of the encoder
+ * @param encoderHandle the encoder handle
+ * @return              the FPGA index of the encoder
  */
 int32_t HAL_GetEncoderFPGAIndex(HAL_EncoderHandle encoderHandle,
                                 int32_t* status);
@@ -298,9 +278,8 @@ int32_t HAL_GetEncoderFPGAIndex(HAL_EncoderHandle encoderHandle,
  *
  * This is used to perform the scaling from raw to type scaled values.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the scale value for the encoder
+ * @param encoderHandle the encoder handle
+ * @return              the scale value for the encoder
  */
 double HAL_GetEncoderDecodingScaleFactor(HAL_EncoderHandle encoderHandle,
                                          int32_t* status);
@@ -308,9 +287,8 @@ double HAL_GetEncoderDecodingScaleFactor(HAL_EncoderHandle encoderHandle,
 /**
  * Gets the user set distance per pulse of the encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the set distance per pulse
+ * @param encoderHandle the encoder handle
+ * @return              the set distance per pulse
  */
 double HAL_GetEncoderDistancePerPulse(HAL_EncoderHandle encoderHandle,
                                       int32_t* status);
@@ -318,9 +296,8 @@ double HAL_GetEncoderDistancePerPulse(HAL_EncoderHandle encoderHandle,
 /**
  * Gets the encoding type of the encoder.
  *
- * @param[in] encoderHandle the encoder handle
- * @param[out] status       Error status variable. 0 on success.
- * @return the encoding type
+ * @param encoderHandle the encoder handle
+ * @return              the encoding type
  */
 HAL_EncoderEncodingType HAL_GetEncoderEncodingType(
     HAL_EncoderHandle encoderHandle, int32_t* status);

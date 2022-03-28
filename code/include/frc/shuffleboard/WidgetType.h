@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <string_view>
+#include <wpi/StringRef.h>
 
 namespace frc {
 
@@ -25,7 +25,7 @@ class WidgetType {
    * Gets the string type of the widget as defined by that widget in
    * Shuffleboard.
    */
-  std::string_view GetWidgetName() const;
+  wpi::StringRef GetWidgetName() const;
 
  private:
   const char* m_widgetName;

@@ -17,16 +17,16 @@ namespace frc {
  * @param x     Vector argument.
  */
 template <int Rows, int Cols, typename F>
-auto NumericalJacobian(F&& f, const Eigen::Vector<double, Cols>& x) {
+auto NumericalJacobian(F&& f, const Eigen::Matrix<double, Cols, 1>& x) {
   constexpr double kEpsilon = 1e-5;
   Eigen::Matrix<double, Rows, Cols> result;
   result.setZero();
 
   // It's more expensive, but +- epsilon will be more accurate
   for (int i = 0; i < Cols; ++i) {
-    Eigen::Vector<double, Cols> dX_plus = x;
+    Eigen::Matrix<double, Cols, 1> dX_plus = x;
     dX_plus(i) += kEpsilon;
-    Eigen::Vector<double, Cols> dX_minus = x;
+    Eigen::Matrix<double, Cols, 1> dX_minus = x;
     dX_minus(i) -= kEpsilon;
     result.col(i) = (f(dX_plus) - f(dX_minus)) / (kEpsilon * 2.0);
   }
@@ -41,19 +41,17 @@ auto NumericalJacobian(F&& f, const Eigen::Vector<double, Cols>& x) {
  * @tparam States  Number of rows in x.
  * @tparam Inputs  Number of rows in u.
  * @tparam F       Function object type.
- * @tparam Args... Types of remaining arguments to f(x, u, ...).
+ * @tparam Args... Remaining arguments to f(x, u, ...).
  * @param f        Vector-valued function from which to compute Jacobian.
  * @param x        State vector.
  * @param u        Input vector.
- * @param args     Remaining arguments to f(x, u, ...).
  */
 template <int Rows, int States, int Inputs, typename F, typename... Args>
-auto NumericalJacobianX(F&& f, const Eigen::Vector<double, States>& x,
-                        const Eigen::Vector<double, Inputs>& u,
+auto NumericalJacobianX(F&& f, const Eigen::Matrix<double, States, 1>& x,
+                        const Eigen::Matrix<double, Inputs, 1>& u,
                         Args&&... args) {
   return NumericalJacobian<Rows, States>(
-      [&](const Eigen::Vector<double, States>& x) { return f(x, u, args...); },
-      x);
+      [&](Eigen::Matrix<double, States, 1> x) { return f(x, u, args...); }, x);
 }
 
 /**
@@ -63,19 +61,17 @@ auto NumericalJacobianX(F&& f, const Eigen::Vector<double, States>& x,
  * @tparam States  Number of rows in x.
  * @tparam Inputs  Number of rows in u.
  * @tparam F       Function object type.
- * @tparam Args... Types of remaining arguments to f(x, u, ...).
+ * @tparam Args... Remaining arguments to f(x, u, ...).
  * @param f        Vector-valued function from which to compute Jacobian.
  * @param x        State vector.
  * @param u        Input vector.
- * @param args     Remaining arguments to f(x, u, ...).
  */
 template <int Rows, int States, int Inputs, typename F, typename... Args>
-auto NumericalJacobianU(F&& f, const Eigen::Vector<double, States>& x,
-                        const Eigen::Vector<double, Inputs>& u,
+auto NumericalJacobianU(F&& f, const Eigen::Matrix<double, States, 1>& x,
+                        const Eigen::Matrix<double, Inputs, 1>& u,
                         Args&&... args) {
   return NumericalJacobian<Rows, Inputs>(
-      [&](const Eigen::Vector<double, Inputs>& u) { return f(x, u, args...); },
-      u);
+      [&](Eigen::Matrix<double, Inputs, 1> u) { return f(x, u, args...); }, u);
 }
 
 }  // namespace frc

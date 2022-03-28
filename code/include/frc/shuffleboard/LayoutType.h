@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <string_view>
+#include <wpi/StringRef.h>
 
 namespace frc {
 
@@ -25,7 +25,7 @@ class LayoutType {
    * Gets the string type of the layout as defined by that layout in
    * Shuffleboard.
    */
-  std::string_view GetLayoutName() const;
+  wpi::StringRef GetLayoutName() const;
 
  private:
   const char* m_layoutName;

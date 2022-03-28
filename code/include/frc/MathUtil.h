@@ -4,22 +4,11 @@
 
 #pragma once
 
-#include <wpi/SymbolExports.h>
-#include <wpi/numbers>
+#include <wpi/math>
 
 #include "units/angle.h"
 
 namespace frc {
-
-/**
- * Returns 0.0 if the given value is within the specified range around zero.
- * The remaining range between the deadband and 1.0 is scaled from 0.0 to 1.0.
- *
- * @param value    Value to clip.
- * @param deadband Range around zero.
- */
-WPILIB_DLLEXPORT
-double ApplyDeadband(double value, double deadband);
 
 /**
  * Returns modulus of input.
@@ -48,11 +37,9 @@ constexpr T InputModulus(T input, T minimumInput, T maximumInput) {
  *
  * @param angle Angle to wrap.
  */
-WPILIB_DLLEXPORT
 constexpr units::radian_t AngleModulus(units::radian_t angle) {
-  return InputModulus<units::radian_t>(angle,
-                                       units::radian_t{-wpi::numbers::pi},
-                                       units::radian_t{wpi::numbers::pi});
+  return InputModulus<units::radian_t>(angle, units::radian_t{-wpi::math::pi},
+                                       units::radian_t{wpi::math::pi});
 }
 
 }  // namespace frc

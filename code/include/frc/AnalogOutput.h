@@ -5,16 +5,21 @@
 #pragma once
 
 #include <hal/Types.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
+
+#include "frc/ErrorBase.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
+
+class SendableBuilder;
 
 /**
  * MXP analog output class.
  */
-class AnalogOutput : public wpi::Sendable,
-                     public wpi::SendableHelper<AnalogOutput> {
+class AnalogOutput : public ErrorBase,
+                     public Sendable,
+                     public SendableHelper<AnalogOutput> {
  public:
   /**
    * Construct an analog output on the given channel.
@@ -49,7 +54,7 @@ class AnalogOutput : public wpi::Sendable,
    */
   int GetChannel() const;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  protected:
   int m_channel;

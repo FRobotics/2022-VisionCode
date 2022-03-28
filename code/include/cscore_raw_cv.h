@@ -9,8 +9,6 @@
 #error "Cannot include both cscore_cv.h and cscore_raw_cv.h in the same file"
 #endif
 
-#include <opencv2/core/mat.hpp>
-
 #include "cscore_raw.h"
 
 namespace cs {
@@ -34,7 +32,7 @@ class RawCvSource : public RawSource {
    * @param name Source name (arbitrary unique identifier)
    * @param mode Video mode being generated
    */
-  RawCvSource(std::string_view name, const VideoMode& mode);
+  RawCvSource(const wpi::Twine& name, const VideoMode& mode);
 
   /**
    * Create a Raw OpenCV source.
@@ -45,7 +43,7 @@ class RawCvSource : public RawSource {
    * @param height height
    * @param fps fps
    */
-  RawCvSource(std::string_view name, VideoMode::PixelFormat pixelFormat,
+  RawCvSource(const wpi::Twine& name, VideoMode::PixelFormat pixelFormat,
               int width, int height, int fps);
 
   /**
@@ -85,7 +83,7 @@ class RawCvSink : public RawSink {
    *
    * @param name Source name (arbitrary unique identifier)
    */
-  explicit RawCvSink(std::string_view name);
+  explicit RawCvSink(const wpi::Twine& name);
 
   /**
    * Create a sink for accepting OpenCV images in a separate thread.
@@ -99,7 +97,7 @@ class RawCvSink : public RawSink {
    *        or GetError() as needed, but should not call (except in very
    *        unusual circumstances) WaitForImage().
    */
-  RawCvSink(std::string_view name,
+  RawCvSink(const wpi::Twine& name,
             std::function<void(uint64_t time)> processFrame);
 
   /**
@@ -111,7 +109,7 @@ class RawCvSink : public RawSink {
    *         message); the frame time is in the same time base as wpi::Now(),
    *         and is in 1 us increments.
    */
-  [[nodiscard]] uint64_t GrabFrame(cv::Mat& image, double timeout = 0.225);
+  uint64_t GrabFrame(cv::Mat& image, double timeout = 0.225);
 
   /**
    * Wait for the next frame and get the image.  May block forever.
@@ -121,7 +119,7 @@ class RawCvSink : public RawSink {
    *         message); the frame time is in the same time base as wpi::Now(),
    *         and is in 1 us increments.
    */
-  [[nodiscard]] uint64_t GrabFrameNoTimeout(cv::Mat& image);
+  uint64_t GrabFrameNoTimeout(cv::Mat& image);
 
   /**
    * Wait for the next frame and get the image.
@@ -132,8 +130,7 @@ class RawCvSink : public RawSink {
    *         message); the frame time is in the same time base as wpi::Now(),
    *         and is in 1 us increments.
    */
-  [[nodiscard]] uint64_t GrabFrameDirect(cv::Mat& image,
-                                         double timeout = 0.225);
+  uint64_t GrabFrameDirect(cv::Mat& image, double timeout = 0.225);
 
   /**
    * Wait for the next frame and get the image.  May block forever.
@@ -143,16 +140,16 @@ class RawCvSink : public RawSink {
    *         message); the frame time is in the same time base as wpi::Now(),
    *         and is in 1 us increments.
    */
-  [[nodiscard]] uint64_t GrabFrameNoTimeoutDirect(cv::Mat& image);
+  uint64_t GrabFrameNoTimeoutDirect(cv::Mat& image);
 
  private:
   RawFrame rawFrame;
 };
 
-inline RawCvSource::RawCvSource(std::string_view name, const VideoMode& mode)
+inline RawCvSource::RawCvSource(const wpi::Twine& name, const VideoMode& mode)
     : RawSource{name, mode} {}
 
-inline RawCvSource::RawCvSource(std::string_view name,
+inline RawCvSource::RawCvSource(const wpi::Twine& name,
                                 VideoMode::PixelFormat format, int width,
                                 int height, int fps)
     : RawSource{name, format, width, height, fps} {}
@@ -167,9 +164,9 @@ inline void RawCvSource::PutFrame(cv::Mat& image) {
   PutSourceFrame(m_handle, rawFrame, &m_status);
 }
 
-inline RawCvSink::RawCvSink(std::string_view name) : RawSink{name} {}
+inline RawCvSink::RawCvSink(const wpi::Twine& name) : RawSink{name} {}
 
-inline RawCvSink::RawCvSink(std::string_view name,
+inline RawCvSink::RawCvSink(const wpi::Twine& name,
                             std::function<void(uint64_t time)> processFrame)
     : RawSink{name, processFrame} {}
 

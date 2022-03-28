@@ -15,9 +15,7 @@
 
 namespace wpi {
 
-/**
- * Base class for SafeThreadOwner threads.
- */
+// Base class for SafeThreadOwner threads.
 class SafeThread {
  public:
   virtual ~SafeThread() = default;
@@ -31,9 +29,7 @@ class SafeThread {
 
 namespace detail {
 
-/**
- * Non-template proxy base class for common proxy code.
- */
+// Non-template proxy base class for common proxy code.
 class SafeThreadProxyBase {
  public:
   explicit SafeThreadProxyBase(std::shared_ptr<SafeThread> thr);
@@ -45,11 +41,8 @@ class SafeThreadProxyBase {
   std::unique_lock<wpi::mutex> m_lock;
 };
 
-/**
- * A proxy for SafeThread.
- *
- * Also serves as a scoped lock on SafeThread::m_mutex.
- */
+// A proxy for SafeThread.
+// Also serves as a scoped lock on SafeThread::m_mutex.
 template <typename T>
 class SafeThreadProxy : public SafeThreadProxyBase {
  public:
@@ -59,9 +52,7 @@ class SafeThreadProxy : public SafeThreadProxyBase {
   T* operator->() const { return static_cast<T*>(m_thread.get()); }
 };
 
-/**
- * Non-template owner base class for common owner code.
- */
+// Non-template owner base class for common owner code.
 class SafeThreadOwnerBase {
  public:
   void Stop();

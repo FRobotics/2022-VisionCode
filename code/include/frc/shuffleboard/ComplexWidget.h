@@ -5,31 +5,27 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
 
 #include <networktables/NetworkTable.h>
+#include <wpi/Twine.h>
 
 #include "frc/shuffleboard/ShuffleboardWidget.h"
-
-namespace wpi {
-class Sendable;
-class SendableBuilder;
-}  // namespace wpi
+#include "frc/smartdashboard/SendableBuilder.h"
+#include "frc/smartdashboard/SendableBuilderImpl.h"
 
 namespace frc {
 
+class Sendable;
 class ShuffleboardContainer;
 
 /**
- * A Shuffleboard widget that handles a Sendable object such as a speed
+ * A Shuffleboard widget that handles a {@link Sendable} object such as a speed
  * controller or sensor.
  */
 class ComplexWidget final : public ShuffleboardWidget<ComplexWidget> {
  public:
-  ComplexWidget(ShuffleboardContainer& parent, std::string_view title,
-                wpi::Sendable& sendable);
-
-  ~ComplexWidget() override;
+  ComplexWidget(ShuffleboardContainer& parent, const wpi::Twine& title,
+                Sendable& sendable);
 
   void EnableIfActuator() override;
 
@@ -39,8 +35,9 @@ class ComplexWidget final : public ShuffleboardWidget<ComplexWidget> {
                  std::shared_ptr<nt::NetworkTable> metaTable) override;
 
  private:
-  wpi::Sendable& m_sendable;
-  std::unique_ptr<wpi::SendableBuilder> m_builder;
+  Sendable& m_sendable;
+  SendableBuilderImpl m_builder;
+  bool m_builderInit = false;
 };
 
 }  // namespace frc

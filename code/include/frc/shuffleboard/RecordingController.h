@@ -6,11 +6,11 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <wpi/SmallVector.h>
+#include <wpi/StringRef.h>
 
 #include "frc/shuffleboard/ShuffleboardEventImportance.h"
 
@@ -23,10 +23,10 @@ class RecordingController final {
 
   void StartRecording();
   void StopRecording();
-  void SetRecordingFileNameFormat(std::string_view format);
+  void SetRecordingFileNameFormat(wpi::StringRef format);
   void ClearRecordingFileNameFormat();
 
-  void AddEventMarker(std::string_view name, std::string_view description,
+  void AddEventMarker(wpi::StringRef name, wpi::StringRef description,
                       ShuffleboardEventImportance importance);
 
  private:

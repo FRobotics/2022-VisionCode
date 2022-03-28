@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "wpi/Signal.h"
-#include "wpi/function_ref.h"
 #include "wpi/uv/Error.h"
 
 namespace wpi::uv {
@@ -172,7 +171,7 @@ class Loop final : public std::enable_shared_from_this<Loop> {
    *
    * @param callback A function to be invoked once for each active handle.
    */
-  void Walk(function_ref<void(Handle&)> callback);
+  void Walk(std::function<void(Handle&)> callback);
 
   /**
    * Reinitialize any kernel state necessary in the child process after

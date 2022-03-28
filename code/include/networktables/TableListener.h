@@ -7,11 +7,14 @@
 
 #include <functional>
 #include <memory>
-#include <string_view>
+
+#include <wpi/StringRef.h>
 
 namespace nt {
 
 class NetworkTable;
+
+using wpi::StringRef;
 
 /**
  * A listener that listens to new sub-tables in a NetworkTable.
@@ -24,9 +27,9 @@ class NetworkTable;
  *
  * @ingroup ntcore_cpp_api
  */
-using TableListener =
-    std::function<void(NetworkTable* parent, std::string_view name,
-                       std::shared_ptr<NetworkTable> table)>;
+typedef std::function<void(NetworkTable* parent, StringRef name,
+                           std::shared_ptr<NetworkTable> table)>
+    TableListener;
 
 }  // namespace nt
 

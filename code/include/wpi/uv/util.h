@@ -8,7 +8,8 @@
 #include <uv.h>
 
 #include <cstring>
-#include <string_view>
+
+#include "wpi/Twine.h"
 
 namespace wpi::uv {
 
@@ -115,7 +116,7 @@ int AddrToName(const in6_addr& addr, T* ip) {
  * @param addr Output binary structure
  * @return Error (same as `uv_ip4_addr()`).
  */
-int NameToAddr(std::string_view ip, unsigned int port, sockaddr_in* addr);
+int NameToAddr(const Twine& ip, unsigned int port, sockaddr_in* addr);
 
 /**
  * Convert a string containing an IPv6 address to a binary structure.
@@ -124,7 +125,7 @@ int NameToAddr(std::string_view ip, unsigned int port, sockaddr_in* addr);
  * @param addr Output binary structure
  * @return Error (same as `uv_ip6_addr()`).
  */
-int NameToAddr(std::string_view ip, unsigned int port, sockaddr_in6* addr);
+int NameToAddr(const Twine& ip, unsigned int port, sockaddr_in6* addr);
 
 /**
  * Convert a string containing an IPv4 address to binary format.
@@ -132,7 +133,7 @@ int NameToAddr(std::string_view ip, unsigned int port, sockaddr_in6* addr);
  * @param addr Output binary
  * @return Error (same as `uv_inet_pton()`).
  */
-int NameToAddr(std::string_view ip, in_addr* addr);
+int NameToAddr(const Twine& ip, in_addr* addr);
 
 /**
  * Convert a string containing an IPv6 address to binary format.
@@ -140,7 +141,7 @@ int NameToAddr(std::string_view ip, in_addr* addr);
  * @param addr Output binary
  * @return Error (same as `uv_inet_pton()`).
  */
-int NameToAddr(std::string_view ip, in6_addr* addr);
+int NameToAddr(const Twine& ip, in6_addr* addr);
 
 }  // namespace wpi::uv
 

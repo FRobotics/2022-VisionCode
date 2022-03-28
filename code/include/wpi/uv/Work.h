@@ -9,7 +9,6 @@
 
 #include <functional>
 #include <memory>
-#include <utility>
 
 #include "wpi/Signal.h"
 #include "wpi/uv/Request.h"
@@ -85,7 +84,7 @@ void QueueWork(Loop& loop, std::function<void()> work,
 inline void QueueWork(const std::shared_ptr<Loop>& loop,
                       std::function<void()> work,
                       std::function<void()> afterWork) {
-  QueueWork(*loop, std::move(work), std::move(afterWork));
+  QueueWork(*loop, work, afterWork);
 }
 
 }  // namespace wpi::uv

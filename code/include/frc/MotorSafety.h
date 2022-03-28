@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include <string>
-
-#include <units/time.h>
 #include <wpi/mutex.h>
+#include <wpi/raw_ostream.h>
 
+#include "frc/ErrorBase.h"
 #include "frc/Timer.h"
 
 namespace frc {
@@ -19,10 +18,10 @@ namespace frc {
  *
  * The subclass should call Feed() whenever the motor value is updated.
  */
-class MotorSafety {
+class MotorSafety : public ErrorBase {
  public:
   MotorSafety();
-  virtual ~MotorSafety();
+  ~MotorSafety() override;
 
   MotorSafety(MotorSafety&& rhs);
   MotorSafety& operator=(MotorSafety&& rhs);
@@ -37,16 +36,16 @@ class MotorSafety {
   /**
    * Set the expiration time for the corresponding motor safety object.
    *
-   * @param expirationTime The timeout value.
+   * @param expirationTime The timeout value in seconds.
    */
-  void SetExpiration(units::second_t expirationTime);
+  void SetExpiration(double expirationTime);
 
   /**
    * Retrieve the timeout value for the corresponding motor safety object.
    *
-   * @return the timeout value.
+   * @return the timeout value in seconds.
    */
-  units::second_t GetExpiration() const;
+  double GetExpiration() const;
 
   /**
    * Determine if the motor is still operating or has timed out.
@@ -91,25 +90,19 @@ class MotorSafety {
   static void CheckMotors();
 
   virtual void StopMotor() = 0;
-
-  /**
-   * The return value from this method is printed out when an error occurs
-   *
-   * This method must not throw!
-   */
-  virtual std::string GetDescription() const = 0;
+  virtual void GetDescription(wpi::raw_ostream& desc) const = 0;
 
  private:
-  static constexpr auto kDefaultSafetyExpiration = 100_ms;
+  static constexpr double kDefaultSafetyExpiration = 0.1;
 
   // The expiration time for this object
-  units::second_t m_expiration = kDefaultSafetyExpiration;
+  double m_expiration = kDefaultSafetyExpiration;
 
   // True if motor safety is enabled for this motor
   bool m_enabled = false;
 
   // The FPGA clock value when the motor has expired
-  units::second_t m_stopTime = Timer::GetFPGATimestamp();
+  double m_stopTime = Timer::GetFPGATimestamp();
 
   mutable wpi::mutex m_thisMutex;
 };

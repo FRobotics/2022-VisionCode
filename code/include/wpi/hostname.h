@@ -6,14 +6,15 @@
 #define WPIUTIL_WPI_HOSTNAME_H_
 
 #include <string>
-#include <string_view>
+
+#include "wpi/StringRef.h"
 
 namespace wpi {
 template <typename T>
 class SmallVectorImpl;
 
 std::string GetHostname();
-std::string_view GetHostname(SmallVectorImpl<char>& name);
+StringRef GetHostname(SmallVectorImpl<char>& name);
 }  // namespace wpi
 
 #endif  // WPIUTIL_WPI_HOSTNAME_H_

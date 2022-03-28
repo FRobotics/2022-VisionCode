@@ -151,12 +151,7 @@ class Async<> final : public HandleImpl<Async<>, uv_async_t> {
    */
   void Send() {
     if (auto loop = m_loop.lock()) {
-      if (loop->GetThreadId() == std::this_thread::get_id()) {
-        // called from within the loop, just call the function directly
-        wakeup();
-      } else {
-        Invoke(&uv_async_send, GetRaw());
-      }
+      Invoke(&uv_async_send, GetRaw());
     }
   }
 

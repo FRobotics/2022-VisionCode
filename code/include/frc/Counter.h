@@ -7,16 +7,17 @@
 #include <memory>
 
 #include <hal/Types.h>
-#include <units/time.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
 
 #include "frc/AnalogTrigger.h"
 #include "frc/CounterBase.h"
+#include "frc/ErrorBase.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
 
 class DigitalGlitchFilter;
+class SendableBuilder;
 class DMA;
 class DMASample;
 
@@ -30,9 +31,10 @@ class DMASample;
  * All counters will immediately start counting - Reset() them if you need them
  * to be zeroed before use.
  */
-class Counter : public CounterBase,
-                public wpi::Sendable,
-                public wpi::SendableHelper<Counter> {
+class Counter : public ErrorBase,
+                public CounterBase,
+                public Sendable,
+                public SendableHelper<Counter> {
   friend class DMA;
   friend class DMASample;
 
@@ -77,7 +79,7 @@ class Counter : public CounterBase,
    *
    * This is used if an existing digital input is to be shared by multiple other
    * objects such as encoders or if the Digital Source is not a Digital Input
-   * channel (such as an Analog %Trigger).
+   * channel (such as an Analog Trigger).
    *
    * The counter will start counting immediately.
    * @param source A pointer to the existing DigitalSource object. It will be
@@ -91,7 +93,7 @@ class Counter : public CounterBase,
    *
    * This is used if an existing digital input is to be shared by multiple other
    * objects such as encoders or if the Digital Source is not a Digital Input
-   * channel (such as an Analog %Trigger).
+   * channel (such as an Analog Trigger).
    *
    * The counter will start counting immediately.
    *
@@ -368,7 +370,7 @@ class Counter : public CounterBase,
    *
    * @returns The period between the last two pulses in units of seconds.
    */
-  units::second_t GetPeriod() const override;
+  double GetPeriod() const override;
 
   /**
    * Set the maximum period where the device is still considered "moving".
@@ -380,7 +382,7 @@ class Counter : public CounterBase,
    * @param maxPeriod The maximum period where the counted device is considered
    *                  moving in seconds.
    */
-  void SetMaxPeriod(units::second_t maxPeriod) final;
+  void SetMaxPeriod(double maxPeriod) final;
 
   /**
    * Select whether you want to continue updating the event timer output when
@@ -420,7 +422,7 @@ class Counter : public CounterBase,
    */
   bool GetDirection() const override;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  protected:
   // Makes the counter count up.

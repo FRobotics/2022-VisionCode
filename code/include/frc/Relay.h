@@ -5,15 +5,18 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include <hal/Types.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
+#include <wpi/raw_ostream.h>
 
+#include "frc/ErrorBase.h"
 #include "frc/MotorSafety.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
+
+class SendableBuilder;
 
 /**
  * Class for Spike style relay outputs.
@@ -28,8 +31,8 @@ namespace frc {
  * a solenoid).
  */
 class Relay : public MotorSafety,
-              public wpi::Sendable,
-              public wpi::SendableHelper<Relay> {
+              public Sendable,
+              public SendableHelper<Relay> {
  public:
   enum Value { kOff, kOn, kForward, kReverse };
   enum Direction { kBothDirections, kForwardOnly, kReverseOnly };
@@ -89,9 +92,9 @@ class Relay : public MotorSafety,
   // MotorSafety interface
   void StopMotor() override;
 
-  std::string GetDescription() const override;
+  void GetDescription(wpi::raw_ostream& desc) const override;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   int m_channel;

@@ -32,8 +32,6 @@
 #include <utility>
 #include <vector>
 
-#include <wpi/SymbolExports.h>
-
 #include "frc/trajectory/Trajectory.h"
 #include "frc/trajectory/constraint/TrajectoryConstraint.h"
 
@@ -41,7 +39,7 @@ namespace frc {
 /**
  * Class used to parameterize a trajectory by time.
  */
-class WPILIB_DLLEXPORT TrajectoryParameterizer {
+class TrajectoryParameterizer {
  public:
   using PoseWithCurvature = std::pair<Pose2d, units::curvature_t>;
 

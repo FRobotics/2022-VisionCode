@@ -7,7 +7,6 @@
 
 #include <uv.h>
 
-#include <cstdlib>
 #include <functional>
 #include <memory>
 
@@ -144,8 +143,7 @@ class NetworkStreamImpl : public NetworkStream {
   }
 
  protected:
-  NetworkStreamImpl()
-      : NetworkStream{static_cast<uv_stream_t*>(std::malloc(sizeof(U)))} {}
+  NetworkStreamImpl() : NetworkStream{reinterpret_cast<uv_stream_t*>(new U)} {}
 };
 
 }  // namespace wpi::uv

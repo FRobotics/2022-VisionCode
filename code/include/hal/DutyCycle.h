@@ -20,12 +20,10 @@ extern "C" {
 /**
  * Initialize a DutyCycle input.
  *
- * @param[in] digitalSourceHandle the digital source to use (either a
- *                                 HAL_DigitalHandle or a
- *                                 HAL_AnalogTriggerHandle)
- * @param[in] triggerType the analog trigger type of the source if it is
- *                         an analog trigger
- * @param[out] status Error status variable. 0 on success.
+ * @param digitalSourceHandle the digital source to use (either a
+ * HAL_DigitalHandle or a HAL_AnalogTriggerHandle)
+ * @param triggerType the analog trigger type of the source if it is
+ * an analog trigger
  * @return thre created duty cycle handle
  */
 HAL_DutyCycleHandle HAL_InitializeDutyCycle(HAL_Handle digitalSourceHandle,
@@ -51,8 +49,7 @@ void HAL_SetDutyCycleSimDevice(HAL_DutyCycleHandle handle,
 /**
  * Get the frequency of the duty cycle signal.
  *
- * @param[in] dutyCycleHandle the duty cycle handle
- * @param[out] status Error status variable. 0 on success.
+ * @param dutyCycleHandle the duty cycle handle
  * @return frequency in Hertz
  */
 int32_t HAL_GetDutyCycleFrequency(HAL_DutyCycleHandle dutyCycleHandle,
@@ -63,8 +60,7 @@ int32_t HAL_GetDutyCycleFrequency(HAL_DutyCycleHandle dutyCycleHandle,
  *
  * <p> 0 means always low, 1 means always high.
  *
- * @param[in] dutyCycleHandle the duty cycle handle
- * @param[out] status Error status variable. 0 on success.
+ * @param dutyCycleHandle the duty cycle handle
  * @return output ratio between 0 and 1
  */
 double HAL_GetDutyCycleOutput(HAL_DutyCycleHandle dutyCycleHandle,
@@ -76,8 +72,7 @@ double HAL_GetDutyCycleOutput(HAL_DutyCycleHandle dutyCycleHandle,
  * <p> 0 means always low, an output equal to
  * GetOutputScaleFactor() means always high.
  *
- * @param[in] dutyCycleHandle the duty cycle handle
- * @param[out] status Error status variable. 0 on success.
+ * @param dutyCycleHandle the duty cycle handle
  * @return output ratio in raw units
  */
 int32_t HAL_GetDutyCycleOutputRaw(HAL_DutyCycleHandle dutyCycleHandle,
@@ -90,8 +85,7 @@ int32_t HAL_GetDutyCycleOutputRaw(HAL_DutyCycleHandle dutyCycleHandle,
  * down to 0. Divide the result of getOutputRaw by this in order to get the
  * percentage between 0 and 1.
  *
- * @param[in] dutyCycleHandle the duty cycle handle
- * @param[out] status Error status variable. 0 on success.
+ * @param dutyCycleHandle the duty cycle handle
  * @return the output scale factor
  */
 int32_t HAL_GetDutyCycleOutputScaleFactor(HAL_DutyCycleHandle dutyCycleHandle,
@@ -100,8 +94,7 @@ int32_t HAL_GetDutyCycleOutputScaleFactor(HAL_DutyCycleHandle dutyCycleHandle,
 /**
  * Get the FPGA index for the DutyCycle.
  *
- * @param[in] dutyCycleHandle the duty cycle handle
- * @param[out] status Error status variable. 0 on success.
+ * @param dutyCycleHandle the duty cycle handle
  * @return the FPGA index
  */
 int32_t HAL_GetDutyCycleFPGAIndex(HAL_DutyCycleHandle dutyCycleHandle,

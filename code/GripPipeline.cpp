@@ -42,18 +42,18 @@ void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double 
 	outputEntries[1].SetDouble(avgY);
 	outputEntries[2].SetDouble(avgWidth);
 	outputEntries[3].SetDouble(avgHeight);
-	outputEntries[4].SetDouble(yOffsetPx);  //123.0); // TODO calc dist -- use Y offset.
+	outputEntries[4].SetDouble(yOffsetPx);  	//123.0); // TODO calc dist -- use Y offset.
 	outputEntries[5].SetDouble(stripeCount);
-	outputEntries[6].SetDouble(heightDiff);
-	outputEntries[7].SetDouble(xOffsetPx);
-	outputEntries[8].SetDouble(watchdog++);
+	outputEntries[6].SetDouble(watchdog++);		// heightDiff);
+	outputEntries[7].SetDouble(heightDiff);		// xOffsetPx);
+	outputEntries[8].SetDouble(xOffsetPx); 		// watchdog++);   fixed order of these values..
 	nt->Flush();
 }
 
 // --------write a boolean to network table to indicate that we found a target or not.
 void UpdateVisionFoundNetworkTable( bool found ) {
 	outputFound.SetBoolean(found);
-	outputEntries[8].SetDouble(watchdog);
+	outputEntries[6].SetDouble(watchdog);
 	nt->Flush();
 }
 

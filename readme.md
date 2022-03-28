@@ -26,7 +26,7 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 3) Issue the command:
 	make build
 
-### To remove existing compiled versions (to force a new compile)
+### To remove existing compiled versions (to force a new compile next time make build is run)
 
 1) Open a windows command prompt.
 
@@ -34,4 +34,26 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 
 3) Issue the command:
 	make clean
+
+
+### To update the executable on the raspberry PI
+
+1) Open the Raspberry pi web page (wpilibpi.local)
+
+2) Go to the application page.  
+
+3) At the top press "writable"
+
+4) In the top section, select "Uploaded C++ executable"
+
+5) Browse to find and select the compiled file.  It is named "multiCameraServerExample".
+It will be in the same directory as main.cpp
+
+5) Press "Upload and save"
+
+6) Go to the "Vision Status" page, and turn on the console to see any messages.
+
+### Compatibility
+This vision program was written using the 2021.3.1 libraries.  It works with that version 
+of the raspberry pi operating system image.  It may or may not work with other versions.
 

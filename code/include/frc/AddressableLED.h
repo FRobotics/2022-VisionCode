@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include <initializer_list>
+#include <memory>
 
 #include <hal/AddressableLEDTypes.h>
 #include <hal/Types.h>
 #include <units/time.h>
-#include <wpi/span.h>
+#include <wpi/ArrayRef.h>
 
+#include "frc/ErrorBase.h"
 #include "util/Color.h"
 #include "util/Color8Bit.h"
 
@@ -21,7 +22,7 @@ namespace frc {
  *
  * <p>Only 1 LED driver is currently supported by the roboRIO.
  */
-class AddressableLED {
+class AddressableLED : public ErrorBase {
  public:
   class LEDData : public HAL_AddressableLEDData {
    public:
@@ -85,7 +86,7 @@ class AddressableLED {
    */
   explicit AddressableLED(int port);
 
-  ~AddressableLED();
+  ~AddressableLED() override;
 
   /**
    * Sets the length of the LED strip.
@@ -107,7 +108,7 @@ class AddressableLED {
    *
    * @param ledData the buffer to write
    */
-  void SetData(wpi::span<const LEDData> ledData);
+  void SetData(wpi::ArrayRef<LEDData> ledData);
 
   /**
    * Sets the led output data.
@@ -140,7 +141,7 @@ class AddressableLED {
    * <p>The sync time is the time to hold output so LEDs enable. Default set for
    * WS2812.
    *
-   * @param syncTime the sync time
+   * @param syncTimeMicroSeconds the sync time
    */
   void SetSyncTime(units::microsecond_t syncTime);
 
@@ -159,6 +160,5 @@ class AddressableLED {
  private:
   hal::Handle<HAL_DigitalHandle> m_pwmHandle;
   hal::Handle<HAL_AddressableLEDHandle> m_handle;
-  int m_port;
 };
 }  // namespace frc

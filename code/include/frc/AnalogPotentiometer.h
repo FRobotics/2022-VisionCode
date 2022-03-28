@@ -6,12 +6,15 @@
 
 #include <memory>
 
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableHelper.h>
-
 #include "frc/AnalogInput.h"
+#include "frc/ErrorBase.h"
+#include "frc/interfaces/Potentiometer.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 
 namespace frc {
+
+class SendableBuilder;
 
 /**
  * Class for reading analog potentiometers. Analog potentiometers read in an
@@ -19,8 +22,10 @@ namespace frc {
  * units you choose, by way of the scaling and offset constants passed to the
  * constructor.
  */
-class AnalogPotentiometer : public wpi::Sendable,
-                            public wpi::SendableHelper<AnalogPotentiometer> {
+class AnalogPotentiometer : public ErrorBase,
+                            public Potentiometer,
+                            public Sendable,
+                            public SendableHelper<AnalogPotentiometer> {
  public:
   /**
    * Construct an Analog Potentiometer object from a channel number.
@@ -58,7 +63,7 @@ class AnalogPotentiometer : public wpi::Sendable,
    * This will calculate the result from the fullRange times the fraction of the
    * supply voltage, plus the offset.
    *
-   * @param input     The existing Analog Input pointer
+   * @param channel   The existing Analog Input pointer
    * @param fullRange The value (in desired units) representing the full
    *                  0-5V range of the input.
    * @param offset    The value (in desired units) representing the
@@ -80,7 +85,7 @@ class AnalogPotentiometer : public wpi::Sendable,
    * This will calculate the result from the fullRange times the fraction of the
    * supply voltage, plus the offset.
    *
-   * @param input     The existing Analog Input pointer
+   * @param channel   The existing Analog Input pointer
    * @param fullRange The value (in desired units) representing the full
    *                  0-5V range of the input.
    * @param offset    The value (in desired units) representing the
@@ -100,9 +105,16 @@ class AnalogPotentiometer : public wpi::Sendable,
    * @return The current position of the potentiometer (in the units used for
    *         fullRange and offset).
    */
-  double Get() const;
+  double Get() const override;
 
-  void InitSendable(wpi::SendableBuilder& builder) override;
+  /**
+   * Implement the PIDSource interface.
+   *
+   * @return The current reading.
+   */
+  double PIDGet() override;
+
+  void InitSendable(SendableBuilder& builder) override;
 
  private:
   std::shared_ptr<AnalogInput> m_analog_input;

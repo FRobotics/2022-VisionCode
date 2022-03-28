@@ -9,18 +9,19 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
+#include "wpi/ArrayRef.h"
 #include "wpi/NetworkStream.h"
 #include "wpi/SmallString.h"
 #include "wpi/SmallVector.h"
 #include "wpi/StringMap.h"
+#include "wpi/StringRef.h"
+#include "wpi/Twine.h"
 #include "wpi/raw_istream.h"
 #include "wpi/raw_socket_istream.h"
 #include "wpi/raw_socket_ostream.h"
-#include "wpi/span.h"
 
 namespace wpi {
 
@@ -28,15 +29,15 @@ namespace wpi {
 // @param buf Buffer for output
 // @param error Set to true if an error occurred
 // @return Escaped string
-std::string_view UnescapeURI(std::string_view str, SmallVectorImpl<char>& buf,
-                             bool* error);
+StringRef UnescapeURI(const Twine& str, SmallVectorImpl<char>& buf,
+                      bool* error);
 
 // Escape a string with %xx-encoding.
 // @param buf Buffer for output
 // @param spacePlus If true, encodes spaces to '+' rather than "%20"
 // @return Escaped string
-std::string_view EscapeURI(std::string_view str, SmallVectorImpl<char>& buf,
-                           bool spacePlus = true);
+StringRef EscapeURI(const Twine& str, SmallVectorImpl<char>& buf,
+                    bool spacePlus = true);
 
 // Parse a set of HTTP headers.  Saves just the Content-Type and Content-Length
 // fields.
@@ -54,7 +55,7 @@ bool ParseHttpHeaders(raw_istream& is, SmallVectorImpl<char>* contentType,
 // @param saveBuf If not null, all scanned characters up to but not including
 //     the boundary are saved to this string
 // @return False if error occurred on input stream, true if boundary found.
-bool FindMultipartBoundary(wpi::raw_istream& is, std::string_view boundary,
+bool FindMultipartBoundary(wpi::raw_istream& is, StringRef boundary,
                            std::string* saveBuf);
 
 /**
@@ -76,7 +77,7 @@ class HttpQueryMap {
    *
    * @param query query string
    */
-  explicit HttpQueryMap(std::string_view query);
+  explicit HttpQueryMap(StringRef query);
 
   /**
    * Gets an element of the query string.  Both the name and the returned
@@ -87,11 +88,11 @@ class HttpQueryMap {
    * @return Optional unescaped value.  Returns an empty optional if the
    *         name is not present in the query map.
    */
-  std::optional<std::string_view> Get(std::string_view name,
-                                      SmallVectorImpl<char>& buf) const;
+  std::optional<StringRef> Get(StringRef name,
+                               SmallVectorImpl<char>& buf) const;
 
  private:
-  StringMap<std::string_view> m_elems;
+  StringMap<StringRef> m_elems;
 };
 
 class HttpPathRef;
@@ -119,7 +120,7 @@ class HttpPath {
    * Constructs a HTTP path from an escaped path string.  Makes a copy of the
    * path, so it's safe to be a temporary.
    */
-  explicit HttpPath(std::string_view path);
+  explicit HttpPath(StringRef path);
 
   /**
    * Evaluates to true if the path is not empty.
@@ -142,13 +143,11 @@ class HttpPath {
    * @param match match list
    * @return True if path equals match list
    */
-  bool equals(std::initializer_list<std::string_view> match) const {
-    return equals(0, {match.begin(), match.end()});
+  bool equals(std::initializer_list<StringRef> match) const {
+    return equals(0, makeArrayRef(match.begin(), match.end()));
   }
-  bool equals(span<const std::string_view> match) const {
-    return equals(0, match);
-  }
-  bool equals(std::string_view match) const { return equals(0, {match}); }
+  bool equals(ArrayRef<StringRef> match) const { return equals(0, match); }
+  bool equals(StringRef match) const { return equals(0, makeArrayRef(match)); }
 
   /**
    * Returns true if the elements of the path starting at the "start" element
@@ -158,18 +157,17 @@ class HttpPath {
    * @param match match list
    * @return True if match
    */
-  bool equals(size_t start,
-              std::initializer_list<std::string_view> match) const {
-    return equals(start, {match.begin(), match.end()});
+  bool equals(size_t start, std::initializer_list<StringRef> match) const {
+    return equals(start, makeArrayRef(match.begin(), match.end()));
   }
-  bool equals(size_t start, span<const std::string_view> match) const {
+  bool equals(size_t start, ArrayRef<StringRef> match) const {
     if (m_pathEnds.size() != (start + match.size())) {
       return false;
     }
     return startswith(start, match);
   }
-  bool equals(size_t start, std::string_view match) const {
-    return equals(start, {match});
+  bool equals(size_t start, StringRef match) const {
+    return equals(start, makeArrayRef(match));
   }
 
   /**
@@ -179,14 +177,14 @@ class HttpPath {
    * @param match match list
    * @return True if path starts with match list
    */
-  bool startswith(std::initializer_list<std::string_view> match) const {
-    return startswith(0, {match.begin(), match.end()});
+  bool startswith(std::initializer_list<StringRef> match) const {
+    return startswith(0, makeArrayRef(match.begin(), match.end()));
   }
-  bool startswith(span<const std::string_view> match) const {
+  bool startswith(ArrayRef<StringRef> match) const {
     return startswith(0, match);
   }
-  bool startswith(std::string_view match) const {
-    return startswith(0, {match});
+  bool startswith(StringRef match) const {
+    return startswith(0, makeArrayRef(match));
   }
 
   /**
@@ -197,21 +195,22 @@ class HttpPath {
    * @param match match list
    * @return True if path starting at the start element matches the match list
    */
-  bool startswith(size_t start,
-                  std::initializer_list<std::string_view> match) const {
-    return startswith(start, {match.begin(), match.end()});
+  bool startswith(size_t start, std::initializer_list<StringRef> match) const {
+    return startswith(start, makeArrayRef(match.begin(), match.end()));
   }
 
-  bool startswith(size_t start, span<const std::string_view> match) const;
+  bool startswith(size_t start, ArrayRef<StringRef> match) const;
 
-  bool startswith(size_t start, std::string_view match) const {
-    return startswith(start, {match});
+  bool startswith(size_t start, StringRef match) const {
+    return startswith(start, makeArrayRef(match));
   }
 
   /**
    * Gets a single element of the path.
    */
-  std::string_view operator[](size_t n) const;
+  StringRef operator[](size_t n) const {
+    return m_pathBuf.slice(n == 0 ? 0 : m_pathEnds[n - 1], m_pathEnds[n]);
+  }
 
   /**
    * Returns a path reference with the first N elements of the path removed.
@@ -237,48 +236,44 @@ class HttpPathRef {
   bool empty() const { return m_path && m_path->size() == m_start; }
   size_t size() const { return m_path ? m_path->size() - m_start : 0; }
 
-  bool equals(std::initializer_list<std::string_view> match) const {
-    return equals(0, {match.begin(), match.end()});
+  bool equals(std::initializer_list<StringRef> match) const {
+    return equals(0, makeArrayRef(match.begin(), match.end()));
   }
-  bool equals(span<const std::string_view> match) const {
-    return equals(0, match);
-  }
-  bool equals(std::string_view match) const { return equals(0, {match}); }
+  bool equals(ArrayRef<StringRef> match) const { return equals(0, match); }
+  bool equals(StringRef match) const { return equals(0, makeArrayRef(match)); }
 
-  bool equals(size_t start,
-              std::initializer_list<std::string_view> match) const {
-    return equals(start, {match.begin(), match.end()});
+  bool equals(size_t start, std::initializer_list<StringRef> match) const {
+    return equals(start, makeArrayRef(match.begin(), match.end()));
   }
-  bool equals(size_t start, span<const std::string_view> match) const {
+  bool equals(size_t start, ArrayRef<StringRef> match) const {
     return m_path ? m_path->equals(m_start + start, match) : false;
   }
-  bool equals(size_t start, std::string_view match) const {
-    return equals(start, {match});
+  bool equals(size_t start, StringRef match) const {
+    return equals(start, makeArrayRef(match));
   }
 
-  bool startswith(std::initializer_list<std::string_view> match) const {
-    return startswith(0, {match.begin(), match.end()});
+  bool startswith(std::initializer_list<StringRef> match) const {
+    return startswith(0, makeArrayRef(match.begin(), match.end()));
   }
-  bool startswith(span<const std::string_view> match) const {
+  bool startswith(ArrayRef<StringRef> match) const {
     return startswith(0, match);
   }
-  bool startswith(std::string_view match) const {
-    return startswith(0, {match});
+  bool startswith(StringRef match) const {
+    return startswith(0, makeArrayRef(match));
   }
 
-  bool startswith(size_t start,
-                  std::initializer_list<std::string_view> match) const {
-    return startswith(start, {match.begin(), match.end()});
+  bool startswith(size_t start, std::initializer_list<StringRef> match) const {
+    return startswith(start, makeArrayRef(match.begin(), match.end()));
   }
-  bool startswith(size_t start, span<const std::string_view> match) const {
+  bool startswith(size_t start, ArrayRef<StringRef> match) const {
     return m_path ? m_path->startswith(m_start + start, match) : false;
   }
-  bool startswith(size_t start, std::string_view match) const {
-    return startswith(start, {match});
+  bool startswith(size_t start, StringRef match) const {
+    return startswith(start, makeArrayRef(match));
   }
 
-  std::string_view operator[](size_t n) const {
-    return m_path ? m_path->operator[](m_start + n) : std::string_view{};
+  StringRef operator[](size_t n) const {
+    return m_path ? m_path->operator[](m_start + n) : StringRef{};
   }
   HttpPathRef drop_front(size_t n) const {
     return m_path ? m_path->drop_front(m_start + n) : HttpPathRef{};
@@ -292,7 +287,7 @@ class HttpPathRef {
 class HttpLocation {
  public:
   HttpLocation() = default;
-  HttpLocation(std::string_view url_, bool* error, std::string* errorMsg);
+  HttpLocation(const Twine& url_, bool* error, std::string* errorMsg);
 
   std::string url;       // retain copy
   std::string user;      // unescaped
@@ -317,13 +312,13 @@ class HttpRequest {
   template <typename T>
   HttpRequest(const HttpLocation& loc, const T& extraParams);
 
-  HttpRequest(const HttpLocation& loc, std::string_view path_)
+  HttpRequest(const HttpLocation& loc, StringRef path_)
       : host{loc.host}, port{loc.port}, path{path_} {
     SetAuth(loc);
   }
 
   template <typename T>
-  HttpRequest(const HttpLocation& loc, std::string_view path_, const T& params)
+  HttpRequest(const HttpLocation& loc, StringRef path_, const T& params)
       : host{loc.host}, port{loc.port} {
     SetPath(path_, params);
     SetAuth(loc);
@@ -337,18 +332,18 @@ class HttpRequest {
  private:
   void SetAuth(const HttpLocation& loc);
   template <typename T>
-  void SetPath(std::string_view path_, const T& params);
+  void SetPath(StringRef path_, const T& params);
 
   template <typename T>
-  static std::string_view GetFirst(const T& elem) {
+  static StringRef GetFirst(const T& elem) {
     return elem.first;
   }
   template <typename T>
-  static std::string_view GetFirst(const StringMapEntry<T>& elem) {
+  static StringRef GetFirst(const StringMapEntry<T>& elem) {
     return elem.getKey();
   }
   template <typename T>
-  static std::string_view GetSecond(const T& elem) {
+  static StringRef GetSecond(const T& elem) {
     return elem.second;
   }
 };
@@ -373,15 +368,14 @@ class HttpConnection {
 
 class HttpMultipartScanner {
  public:
-  explicit HttpMultipartScanner(std::string_view boundary,
-                                bool saveSkipped = false) {
+  explicit HttpMultipartScanner(StringRef boundary, bool saveSkipped = false) {
     Reset(saveSkipped);
     SetBoundary(boundary);
   }
 
   // Change the boundary.  This is only safe to do when IsDone() is true (or
   // immediately after construction).
-  void SetBoundary(std::string_view boundary);
+  void SetBoundary(StringRef boundary);
 
   // Reset the scanner.  This allows reuse of internal buffers.
   void Reset(bool saveSkipped = false);
@@ -390,14 +384,14 @@ class HttpMultipartScanner {
   // is true.
   // @param in input data
   // @return the input not consumed; empty if all input consumed
-  std::string_view Execute(std::string_view in);
+  StringRef Execute(StringRef in);
 
   // Returns true when the boundary has been found.
   bool IsDone() const { return m_state == kDone; }
 
   // Get the skipped data.  Will be empty if saveSkipped was false.
-  std::string_view GetSkipped() const {
-    return m_saveSkipped ? std::string_view{m_buf} : std::string_view{};
+  StringRef GetSkipped() const {
+    return m_saveSkipped ? StringRef{m_buf} : StringRef{};
   }
 
  private:
@@ -417,6 +411,6 @@ class HttpMultipartScanner {
 
 }  // namespace wpi
 
-#include "HttpUtil.inc"
+#include "HttpUtil.inl"
 
 #endif  // WPIUTIL_WPI_HTTPUTIL_H_

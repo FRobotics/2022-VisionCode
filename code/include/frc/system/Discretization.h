@@ -5,15 +5,15 @@
 #pragma once
 
 #include "Eigen/Core"
+#include "Eigen/src/LU/PartialPivLU.h"
 #include "units/time.h"
-#include "unsupported/Eigen/MatrixFunctions"
+#include "unsupported/Eigen/src/MatrixFunctions/MatrixExponential.h"
 
 namespace frc {
 
 /**
  * Discretizes the given continuous A matrix.
  *
- * @tparam States Number of states.
  * @param contA Continuous system matrix.
  * @param dt    Discretization timestep.
  * @param discA Storage for discrete system matrix.
@@ -22,14 +22,12 @@ template <int States>
 void DiscretizeA(const Eigen::Matrix<double, States, States>& contA,
                  units::second_t dt,
                  Eigen::Matrix<double, States, States>* discA) {
-  *discA = (contA * dt.value()).exp();
+  *discA = (contA * dt.to<double>()).exp();
 }
 
 /**
  * Discretizes the given continuous A and B matrices.
  *
- * @tparam States Number of states.
- * @tparam Inputs Number of inputs.
  * @param contA Continuous system matrix.
  * @param contB Continuous input matrix.
  * @param dt    Discretization timestep.
@@ -45,8 +43,8 @@ void DiscretizeAB(const Eigen::Matrix<double, States, States>& contA,
   // Matrices are blocked here to minimize matrix exponentiation calculations
   Eigen::Matrix<double, States + Inputs, States + Inputs> Mcont;
   Mcont.setZero();
-  Mcont.template block<States, States>(0, 0) = contA * dt.value();
-  Mcont.template block<States, Inputs>(0, States) = contB * dt.value();
+  Mcont.template block<States, States>(0, 0) = contA * dt.to<double>();
+  Mcont.template block<States, Inputs>(0, States) = contB * dt.to<double>();
 
   // Discretize A and B with the given timestep
   Eigen::Matrix<double, States + Inputs, States + Inputs> Mdisc = Mcont.exp();
@@ -57,7 +55,6 @@ void DiscretizeAB(const Eigen::Matrix<double, States, States>& contA,
 /**
  * Discretizes the given continuous A and Q matrices.
  *
- * @tparam States Number of states.
  * @param contA Continuous system matrix.
  * @param contQ Continuous process noise covariance matrix.
  * @param dt    Discretization timestep.
@@ -80,7 +77,8 @@ void DiscretizeAQ(const Eigen::Matrix<double, States, States>& contA,
   M.template block<States, States>(States, 0).setZero();
   M.template block<States, States>(States, States) = contA.transpose();
 
-  Eigen::Matrix<double, 2 * States, 2 * States> phi = (M * dt.value()).exp();
+  Eigen::Matrix<double, 2 * States, 2 * States> phi =
+      (M * dt.to<double>()).exp();
 
   // Phi12 = phi[0:States,        States:2*States]
   // Phi22 = phi[States:2*States, States:2*States]
@@ -109,7 +107,6 @@ void DiscretizeAQ(const Eigen::Matrix<double, States, States>& contA,
  *    using a taylor series to several terms and still be substantially cheaper
  *    than taking the big exponential.
  *
- * @tparam States Number of states.
  * @param contA Continuous system matrix.
  * @param contQ Continuous process noise covariance matrix.
  * @param dt    Discretization timestep.
@@ -126,9 +123,9 @@ void DiscretizeAQTaylor(const Eigen::Matrix<double, States, States>& contA,
   Eigen::Matrix<double, States, States> Q = (contQ + contQ.transpose()) / 2.0;
 
   Eigen::Matrix<double, States, States> lastTerm = Q;
-  double lastCoeff = dt.value();
+  double lastCoeff = dt.to<double>();
 
-  // Aᵀⁿ
+  // A^T^n
   Eigen::Matrix<double, States, States> Atn = contA.transpose();
 
   Eigen::Matrix<double, States, States> phi12 = lastTerm * lastCoeff;
@@ -136,7 +133,7 @@ void DiscretizeAQTaylor(const Eigen::Matrix<double, States, States>& contA,
   // i = 6 i.e. 5th order should be enough precision
   for (int i = 2; i < 6; ++i) {
     lastTerm = -contA * lastTerm + Q * Atn;
-    lastCoeff *= dt.value() / static_cast<double>(i);
+    lastCoeff *= dt.to<double>() / static_cast<double>(i);
 
     phi12 += lastTerm * lastCoeff;
 
@@ -154,14 +151,13 @@ void DiscretizeAQTaylor(const Eigen::Matrix<double, States, States>& contA,
  * Returns a discretized version of the provided continuous measurement noise
  * covariance matrix.
  *
- * @tparam Outputs Number of outputs.
  * @param R  Continuous measurement noise covariance matrix.
  * @param dt Discretization timestep.
  */
 template <int Outputs>
 Eigen::Matrix<double, Outputs, Outputs> DiscretizeR(
     const Eigen::Matrix<double, Outputs, Outputs>& R, units::second_t dt) {
-  return R / dt.value();
+  return R / dt.to<double>();
 }
 
 }  // namespace frc

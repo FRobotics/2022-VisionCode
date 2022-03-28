@@ -90,7 +90,7 @@ class DutyCycleSim {
    *
    * @param frequency the new frequency
    */
-  void SetFrequency(int frequency);
+  void SetFrequency(int count);
 
   /**
    * Register a callback to be run whenever the output changes.
@@ -114,7 +114,7 @@ class DutyCycleSim {
    *
    * @param output the new output value
    */
-  void SetOutput(double output);
+  void SetOutput(double period);
 
   /**
    * Reset all simulation data for the duty cycle output.
