@@ -222,8 +222,8 @@ void GripPipeline::Process(cv::Mat& source0){
 
 
 	UpdateVisionNetworkTable(avgX, avgY, avgWidth, avgHeight, stripes.size(), 
-				highest.center.y-lowest.center.y, highest.center.x - source0.cols,
-				highest.center.y - source0.rows);
+				highest.center.y-lowest.center.y, highest.center.x - source0.cols/2,
+				highest.center.y - source0.rows/2);
 
 	UpdateVisionFoundNetworkTable( true );
 }
