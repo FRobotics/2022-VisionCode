@@ -57,12 +57,14 @@ void UpdateVisionFoundNetworkTable( bool found ) {
 	nt->Flush();
 }
 
-/**
-* Runs an iteration of the pipeline and updates outputs.
-*/
 bool SortRect(cv::RotatedRect &a, cv::RotatedRect &b) {
 	return a.center.y < b.center.y;
 }
+
+
+/**
+* Runs an iteration of the pipeline and updates outputs.
+*/
 void GripPipeline::Process(cv::Mat& source0){
 	//Step HSV_Threshold0:
 	//input
@@ -121,6 +123,7 @@ void GripPipeline::Process(cv::Mat& source0){
 			rotatedRectangles.push_back(cv::minAreaRect(convexHullsContours[i]));
 			CorrectRect(rotatedRectangles[i]);
 		}
+		// -------- this appears to sort on "center Y"
 		sort(rotatedRectangles.begin(), rotatedRectangles.end(), SortRect);
 
 		/* --debug-- if (watchdog % 100*20 == 0) {
@@ -246,7 +249,7 @@ void GripPipeline::Process(cv::Mat& source0){
 		//						y offset
 		UpdateVisionNetworkTable( avgX, avgY, avgWidth, avgHeight, stripes.size(), 
 								highest.center.y-lowest.center.y, highest.center.x - source0.cols,
-								avgY - source0.rows);
+								highest.center.y - source0.rows);
 
 		UpdateVisionFoundNetworkTable( true );
 	}
