@@ -21,7 +21,7 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 
 1) After performing the install -- open a windows command prompt.
 
-2) Navigate to the "code" directory under the github repository's root directory.
+2) Navigate to the "codeDariusWindows" directory under the github repository's root directory.
 
 3) Issue the command:
 	make build
@@ -30,7 +30,7 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 
 1) Open a windows command prompt.
 
-2) Navigate to the "code" directory under the github repository's root directory.
+2) Navigate to the "codeDariusWindows" directory under the github repository's root directory.
 
 3) Issue the command:
 	make clean
@@ -46,7 +46,7 @@ the PATH variable and add C:\raspbian10\bin to it (it’s a semicolon-delimited 
 
 4) In the top section, select "Uploaded C++ executable"
 
-5) Browse to find and select the compiled file.  It is named "multiCameraServerExample".
+5) Browse to find and select the compiled file.  It is named "FroboticsVision2022".
 It will be in the same directory as main.cpp
 
 5) Press "Upload and save"
