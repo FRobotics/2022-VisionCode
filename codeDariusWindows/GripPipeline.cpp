@@ -55,6 +55,7 @@ bool SortRect(cv::RotatedRect &a, cv::RotatedRect &b) {
 	return a.center.y < b.center.y;
 }
 void GripPipeline::Process(cv::Mat& source0){
+	try {
 	FetchVisionNetworkTable();
 	//Step HSV_Threshold0:
 	//input
@@ -223,6 +224,13 @@ void GripPipeline::Process(cv::Mat& source0){
 
 
 	UpdateVisionNetworkTable(avgX, avgY, avgWidth, avgHeight, stripes.size(), source0.rows/2 - highest.center.y , avgX - source0.cols/2);
+	} /** end of try */
+	catch (int trappedErrorCode){
+		wpi::errs() << "Pipeline process trapped error" << trappedErrorCode << "\n";
+	}
+	catch(...) {
+		wpi::errs() << "Pipeline process trapped error - unknown \n";
+	}
 }
 
 /**
