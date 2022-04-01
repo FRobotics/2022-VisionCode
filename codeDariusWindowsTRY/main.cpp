@@ -277,8 +277,16 @@ class MyPipeline : public frc::VisionPipeline {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  std::this_thread::sleep_for(std::chrono::seconds(30));
+
   if (argc >= 2) configFile = argv[1];
+
+  wpi::errs() << "Starting main vision processing program.\n";
+  wpi::errs() << "Waiting 30 seconds for roborio and radio startup.\n";
+
+  std::this_thread::sleep_for(std::chrono::seconds(30));
+
+
+  wpi::errs() << "Waiting complete. Resuming startup.\n";
 
   // read configuration
   if (!ReadConfig()) return EXIT_FAILURE;
@@ -306,6 +314,7 @@ int main(int argc, char* argv[]) {
     ntinst.GetEntry("/vision/Debug").SetString("Vision Index Not Set!");
     visionIndex = 0;
   }
+  wpi::errs() << "Vision camera is index: " << visionIndex << ".\n";
   
 
   // start switched cameras
@@ -315,7 +324,11 @@ int main(int argc, char* argv[]) {
 
   grip::nt = &ntinst;
   // start image processing on camera 0 if present
-  if (cameras.size() >= 1) {
+  // if (cameras.size() >= 1) {
+   if (cameras.size() >= visionIndex+1) {
+
+    wpi::errs() << "Starting vision processing thread.\n";
+
     std::thread([&] {
       frc::VisionRunner<grip::GripPipeline> runner(cameras[visionIndex], new grip::GripPipeline(),
                                            [&](grip::GripPipeline &pipeline) {
@@ -352,7 +365,10 @@ int main(int argc, char* argv[]) {
 
       runner.RunForever();
     }).detach();
+    wpi::errs() << "Vision processing thread startup complete.\n";
   }
+
+  wpi::errs() << "Vision processing main program startup complete.\n";
 
   // loop forever
   double n = 0;
