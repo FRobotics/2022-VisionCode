@@ -1,18 +1,60 @@
 #include "GripPipeline.h"
-// #include <exception>
+
+#include <wpi/raw_istream.h>
+#include <wpi/raw_ostream.h>
 
 namespace grip {
-// Sets defaults for HSV
-GripPipeline::GripPipeline() {
-	hsvThresholdHue[1] = 112.0;
-	hsvThresholdHue[0] = 40.0;
-	hsvThresholdSaturation[1] = 233.0;
-	hsvThresholdSaturation[0] = 60.0;
-	hsvThresholdValue[1] = 255.0;
-	hsvThresholdValue[0] =  216.0;
-	cameraConstY = 24.0;
-	cameraConstX = 320.0/14.0;
-}
+
+// ------- global variables..
+static double hsvThresholdHue[2] = { 40.0, 112.0 };
+static double hsvThresholdSaturation[2] = { 60.0, 233.0 };
+static double hsvThresholdValue[2] = { 216.0, 255.0 };
+
+static double cameraConstX = 320.0 / 14.0;
+static double cameraConstY = 24.0;
+
+//hsvThresholdHue[1] = 112.0 ;
+//hsvThresholdHue[0] = 40.0;
+//hsvThresholdSaturation[1] = 233.0;
+//hsvThresholdSaturation[0] = 60.0;
+//hsvThresholdValue[1] = 255.0 ;
+//hsvThresholdValue[0] =  216.0;
+//cameraConstY = 24.0;
+//cameraConstX = 320.0/14.0;
+
+static int watchdog = 0;
+static int filterHeight = 30;
+static double deviationThresh = 400;
+
+static nt::NetworkTableInstance * nt;
+
+static nt::NetworkTableEntry targetFound;
+static nt::NetworkTableEntry hsvThresholdEntries[6];
+static nt::NetworkTableEntry hsvThresholdEntriesFB[6];
+static nt::NetworkTableEntry filterEntries[2];
+/*
+  Entries are:
+0: Vertical Filter Width
+1: Deviation Threshold
+*/
+
+static nt::NetworkTableEntry outputEntries[9];
+/*
+  Entries are:
+0 : Average X
+1 : Average Y
+2 : Average Width
+3 : Average Height
+4 : Distance
+5 : Stripe Count
+6: Height difference between highest and lowest strip
+7: X offset in px from center of highest strip
+8: Watchdog
+ */
+
+
+// -------- global functions
+
 // Standardizes the angles for scoring purposes (not needed for this algorithm, but kept for future use
 void CorrectRect(cv::RotatedRect &rect) {
 	if (rect.size.width > rect.size.height)
@@ -23,18 +65,74 @@ void CorrectRect(cv::RotatedRect &rect) {
 
 	rect.angle = 90 + rect.angle;
 }
+
+
+// get the entry numbers for our network table variables.
+void GetVisionNetworkTableEntries( nt::NetworkTableInstance &myNtInst ) {
+
+	grip::nt = &myNtInst;
+
+	grip::hsvThresholdEntries[0] = grip::nt->GetEntry("/vision/HSV/hueLow");      
+  	grip::hsvThresholdEntries[1] = grip::nt->GetEntry("/vision/HSV/hueHigh");
+  	grip::hsvThresholdEntries[2] = grip::nt->GetEntry("/vision/HSV/satLow");
+  	grip::hsvThresholdEntries[3] = grip::nt->GetEntry("/vision/HSV/satHigh");
+  	grip::hsvThresholdEntries[4] = grip::nt->GetEntry("/vision/HSV/valLow");
+  	grip::hsvThresholdEntries[5] = grip::nt->GetEntry("/vision/HSV/valHigh");
+
+	grip::hsvThresholdEntriesFB[0] = grip::nt->GetEntry("/vision/HSV/FB_hueLow");      
+  	grip::hsvThresholdEntriesFB[1] = grip::nt->GetEntry("/vision/HSV/FB_hueHigh");
+  	grip::hsvThresholdEntriesFB[2] = grip::nt->GetEntry("/vision/HSV/FB_satLow");
+  	grip::hsvThresholdEntriesFB[3] = grip::nt->GetEntry("/vision/HSV/FB_satHigh");
+  	grip::hsvThresholdEntriesFB[4] = grip::nt->GetEntry("/vision/HSV/FB_valLow");
+  	grip::hsvThresholdEntriesFB[5] = grip::nt->GetEntry("/vision/HSV/FB_valHigh");
+
+  	grip::outputEntries[0] = grip::nt->GetEntry("/vision/averageX");
+  	grip::outputEntries[1] = grip::nt->GetEntry("/vision/averageY");
+  	grip::outputEntries[2] = grip::nt->GetEntry("/vision/averageWidth");
+  	grip::outputEntries[3] = grip::nt->GetEntry("/vision/averageHeight");
+  	grip::outputEntries[4] = grip::nt->GetEntry("/vision/distance");
+  	grip::outputEntries[5] = grip::nt->GetEntry("/vision/stripeCount");
+  	grip::outputEntries[6] = grip::nt->GetEntry("/vision/stripHeightDiff");
+  	grip::outputEntries[7] = grip::nt->GetEntry("/vision/stripXOffset");
+  	grip::outputEntries[8] = grip::nt->GetEntry("/vision/watchdog");
+
+  	grip::filterEntries[0] = grip::nt->GetEntry("/vision/filterHeight");
+  	grip::filterEntries[1] = grip::nt->GetEntry("/vision/deviationThreshold");
+
+  	grip::targetFound = grip::nt->GetEntry("/vision/targetFound");
+
+}
+
 // Updates interal values from NT table (runs every second)
 void FetchVisionNetworkTable() {
 	try {
-	filterHeight = filterEntries[0].GetDouble(filterHeight);
-	deviationThresh = filterEntries[1].GetDouble(deviationThresh);
 
-	hsvThresholdHue[0] = hsvThresholdEntries[0].GetDouble(hsvThresholdHue[0]); 
-	hsvThresholdHue[1] = hsvThresholdEntries[1].GetDouble(hsvThresholdHue[1]);
-	hsvThresholdSaturation[0] = hsvThresholdEntries[2].GetDouble(hsvThresholdSaturation[0]);
-	hsvThresholdSaturation[1] = hsvThresholdEntries[3].GetDouble(hsvThresholdSaturation[1]);
-	hsvThresholdValue[0] = hsvThresholdEntries[4].GetDouble(hsvThresholdValue[0]);
-	hsvThresholdValue[1] = hsvThresholdEntries[5].GetDouble(hsvThresholdValue[1]);
+		// --------write the feedback values first (This gives a second for stuff to happen.)
+		grip::hsvThresholdEntriesFB[0].SetDouble(grip::hsvThresholdHue[0]); 
+		grip::hsvThresholdEntriesFB[1].SetDouble(grip::hsvThresholdHue[1]);
+		grip::hsvThresholdEntriesFB[2].SetDouble(grip::hsvThresholdSaturation[0]);
+		grip::hsvThresholdEntriesFB[3].SetDouble(grip::hsvThresholdSaturation[1]);
+		grip::hsvThresholdEntriesFB[4].SetDouble(grip::hsvThresholdValue[0]);
+		grip::hsvThresholdEntriesFB[5].SetDouble(grip::hsvThresholdValue[1]);
+
+		// --------read values for tuning
+		grip::filterHeight = grip::filterEntries[0].GetDouble(grip::filterHeight);
+		grip::deviationThresh = grip::filterEntries[1].GetDouble(grip::deviationThresh);
+
+		grip::hsvThresholdHue[0] = grip::hsvThresholdEntries[0].GetDouble(grip::hsvThresholdHue[0]); 
+		grip::hsvThresholdHue[1] = grip::hsvThresholdEntries[1].GetDouble(grip::hsvThresholdHue[1]);
+		grip::hsvThresholdSaturation[0] = grip::hsvThresholdEntries[2].GetDouble(grip::hsvThresholdSaturation[0]);
+		grip::hsvThresholdSaturation[1] = grip::hsvThresholdEntries[3].GetDouble(grip::hsvThresholdSaturation[1]);
+		grip::hsvThresholdValue[0] = grip::hsvThresholdEntries[4].GetDouble(grip::hsvThresholdValue[0]);
+		grip::hsvThresholdValue[1] = grip::hsvThresholdEntries[5].GetDouble(grip::hsvThresholdValue[1]);
+
+
+		// wpi::errs() << "###Read Vars   Hue 0" << grip::hsvThresholdHue[0] << "\n";
+		// wpi::errs() << "...Read Vars   Hue 1" << grip::hsvThresholdHue[1] << "\n";
+		// wpi::errs() << "...Read Vars   Sat 0" << grip::hsvThresholdSaturation[0] << "\n";
+		// wpi::errs() << "...Read Vars   Sat 1" << grip::hsvThresholdSaturation[1] << "\n";
+		// wpi::errs() << "...Read Vars   Val 0" << grip::hsvThresholdValue[0] << "\n";
+		// wpi::errs() << "...Read Vars   Val 1" << grip::hsvThresholdValue[1] << "\n";
 	}
 	catch (std::exception& trappedErrorCode){
 		wpi::errs() << "FetchVisionNetworkTable -  trapped error" << trappedErrorCode.what() << "\n";
@@ -44,6 +142,16 @@ void FetchVisionNetworkTable() {
 	}
 
 }
+
+// Output values to network tables if target is not found.
+void UpdateVisionNetworkTableNotFound() {
+
+	targetFound.SetBoolean(false);
+	// outputEntries[8].SetDouble(watchdog); // MAYBE NOT THIS ONE IN CASE IT USED AS A FOUND INDICATOR.
+
+}
+
+
 // Outputs values from algorithm (runs every tick)
 void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double avgHeight, double stripeCount, double heightDiff, 
 				double xOffsetPx) {
@@ -58,6 +166,7 @@ void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double 
 	outputEntries[6].SetDouble(heightDiff);
 	outputEntries[7].SetDouble(xOffsetPx);
 	outputEntries[8].SetDouble(watchdog++);
+	targetFound.SetBoolean(true);
 	nt->Flush();
 	}
 	catch (std::exception& trappedErrorCode){
@@ -67,21 +176,31 @@ void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double 
 		wpi::errs() << "UpdateVisionNetworkTable -  trapped error - unknown \n";
 	}
 }
-/**
-* Runs an iteration of the pipeline and updates outputs.
-*/
 bool SortRect(cv::RotatedRect &a, cv::RotatedRect &b) {
 	return a.center.y < b.center.y;
 }
+
+/**
+* Runs an iteration of the pipeline and updates outputs.
+*/
+
+// ======== class functions
+
+
+// Constructor
+GripPipeline::GripPipeline() {
+
+}
+
+
 void GripPipeline::Process(cv::Mat& source0){
 	try {
-
-	FetchVisionNetworkTable();
 
 	//Step HSV_Threshold0:
 	//input
 	cv::Mat hsvThresholdInput = source0;
-	hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, this->hsvThresholdOutput);
+	hsvThreshold( hsvThresholdInput, grip::hsvThresholdHue, grip::hsvThresholdSaturation, grip::hsvThresholdValue, 
+				this->hsvThresholdOutput);
 
 	//Step Blur0:
 	//input
@@ -120,6 +239,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	// --------added just in case.
 	if (convexHullsContours.size() == 0) {
 		watchdog++;
+		UpdateVisionNetworkTableNotFound();
 		return;
 	}
 
@@ -156,6 +276,7 @@ void GripPipeline::Process(cv::Mat& source0){
 
 	if (rotatedRectangles.size() == 0) {
 		watchdog++;
+		UpdateVisionNetworkTableNotFound();
 		return;
 	}
 
@@ -205,6 +326,7 @@ void GripPipeline::Process(cv::Mat& source0){
 
 	if (rotatedRectangles.size() == 0) {
 		watchdog++;
+		UpdateVisionNetworkTableNotFound();
 		return;
 	}
 	double avgWidth = 0;
@@ -243,6 +365,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	}
 	else {
 		watchdog++;
+		UpdateVisionNetworkTableNotFound();
 		return;
 	}
 
@@ -273,9 +396,11 @@ void GripPipeline::Process(cv::Mat& source0){
 
 	} /** end of try */
 	catch (std::exception& trappedErrorCode){
+		UpdateVisionNetworkTableNotFound();
 		wpi::errs() << "Pipeline process trapped error" << trappedErrorCode.what() << "\n";
 	}
 	catch(...) {
+		UpdateVisionNetworkTableNotFound();
 		wpi::errs() << "Pipeline process trapped error - unknown \n";
 	}
 }

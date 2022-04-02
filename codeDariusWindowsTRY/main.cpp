@@ -21,7 +21,7 @@
 // #include <exception>
 
 #include "cameraserver/CameraServer.h"
-#include "GripPipeline.cpp"
+#include "GripPipeline.h"
 
 /*
    JSON format:
@@ -320,9 +320,11 @@ int main(int argc, char* argv[]) {
   // start switched cameras
   for (const auto& config : switchedCameraConfigs) StartSwitchedCamera(config);
 
-  
+  grip::GetVisionNetworkTableEntries( ntinst );
 
-  grip::nt = &ntinst;
+  grip::FetchVisionNetworkTable();
+
+
   // start image processing on camera 0 if present
   // if (cameras.size() >= 1) {
    if (cameras.size() >= visionIndex+1) {
@@ -333,7 +335,7 @@ int main(int argc, char* argv[]) {
       frc::VisionRunner<grip::GripPipeline> runner(cameras[visionIndex], new grip::GripPipeline(),
                                            [&](grip::GripPipeline &pipeline) {
         // do something with pipeline results
-	grip::FetchVisionNetworkTable();
+	      // grip::FetchVisionNetworkTable();
       });
       /* something like this for GRIP:
       frc::VisionRunner<MyPipeline> runner(cameras[0], new grip::GripPipeline(),
@@ -341,28 +343,6 @@ int main(int argc, char* argv[]) {
         ...
       });
        */
-      grip::hsvThresholdEntries[0] = ntinst.GetEntry("/vision/HSV/hueLow");      
-      grip::hsvThresholdEntries[1] = ntinst.GetEntry("/vision/HSV/hueHigh");
-      grip::hsvThresholdEntries[2] = ntinst.GetEntry("/vision/HSV/satLow");
-      grip::hsvThresholdEntries[3] = ntinst.GetEntry("/vision/HSV/satHigh");
-      grip::hsvThresholdEntries[4] = ntinst.GetEntry("/vision/HSV/valLow");
-      grip::hsvThresholdEntries[5] = ntinst.GetEntry("/vision/HSV/valHigh");
-
-      grip::outputEntries[0] = ntinst.GetEntry("/vision/averageX");
-      grip::outputEntries[1] = ntinst.GetEntry("/vision/averageY");
-      grip::outputEntries[2] = ntinst.GetEntry("/vision/averageWidth");
-      grip::outputEntries[3] = ntinst.GetEntry("/vision/averageHeight");
-      grip::outputEntries[4] = ntinst.GetEntry("/vision/distance");
-      grip::outputEntries[5] = ntinst.GetEntry("/vision/stripeCount");
-      grip::outputEntries[6] = ntinst.GetEntry("/vision/stripHeightDiff");
-      grip::outputEntries[7] = ntinst.GetEntry("/vision/stripXOffset");
-      grip::outputEntries[8] = ntinst.GetEntry("/vision/watchdog");
-
-      grip::filterEntries[0] = ntinst.GetEntry("/vision/filterHeight");
-      grip::filterEntries[1] = ntinst.GetEntry("/vision/deviationThreshold");
-
-      grip::FetchVisionNetworkTable();
-
       runner.RunForever();
     }).detach();
     wpi::errs() << "Vision processing thread startup complete.\n";
@@ -373,8 +353,11 @@ int main(int argc, char* argv[]) {
   // loop forever
   double n = 0;
   for (;;) {
-	n++;
-	grip::FetchVisionNetworkTable();
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+  	n++;
+	  grip::FetchVisionNetworkTable();
+	  std::this_thread::sleep_for(std::chrono::seconds(3));
+    if ( n < 20 ) {
+      wpi::errs() << "Vision program main loop.  Iteration " << (int)n << "\n";
+    }
   }
 }

@@ -14,7 +14,7 @@ install: build
 clean:
 	rm ${EXE} *.o
 
-OBJS=main.o
+OBJS=main.o GripPipeline.o
 
 ${EXE}: ${OBJS}
 	${CXX} -pthread -g -o $@ $^ ${DEPS_LIBS} -Wl,--unresolved-symbols=ignore-in-shared-libs
