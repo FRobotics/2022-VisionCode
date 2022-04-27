@@ -276,7 +276,7 @@ class MyPipeline : public frc::VisionPipeline {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  std::this_thread::sleep_for(std::chrono::seconds(30));
+  //std::this_thread::sleep_for(std::chrono::seconds(30));
   if (argc >= 2) configFile = argv[1];
 
   // read configuration
@@ -315,6 +315,7 @@ int main(int argc, char* argv[]) {
   grip::nt = &ntinst;
   // start image processing on camera 0 if present
   if (cameras.size() >= 1) {
+    std::cout << __LINE__ << std::endl;
     std::thread([&] {
       frc::VisionRunner<grip::GripPipeline> runner(cameras[visionIndex], new grip::GripPipeline(),
                                            [&](grip::GripPipeline &pipeline) {
@@ -326,6 +327,7 @@ int main(int argc, char* argv[]) {
                                            [&](grip::GripPipeline& pipeline) {
         ...
       });
+    std::cout << __LINE__ << std::endl;
        */
       grip::hsvThresholdEntries[0] = ntinst.GetEntry("/vision/HSV/hueLow");      
       grip::hsvThresholdEntries[1] = ntinst.GetEntry("/vision/HSV/hueHigh");
@@ -334,6 +336,7 @@ int main(int argc, char* argv[]) {
       grip::hsvThresholdEntries[4] = ntinst.GetEntry("/vision/HSV/valLow");
       grip::hsvThresholdEntries[5] = ntinst.GetEntry("/vision/HSV/valHigh");
 
+    std::cout << __LINE__ << std::endl;
       grip::outputEntries[0] = ntinst.GetEntry("/vision/averageX");
       grip::outputEntries[1] = ntinst.GetEntry("/vision/averageY");
       grip::outputEntries[2] = ntinst.GetEntry("/vision/averageWidth");
@@ -344,11 +347,13 @@ int main(int argc, char* argv[]) {
       grip::outputEntries[7] = ntinst.GetEntry("/vision/stripXOffset");
       grip::outputEntries[8] = ntinst.GetEntry("/vision/watchdog");
 
+    std::cout << __LINE__ << std::endl;
       grip::filterEntries[0] = ntinst.GetEntry("/vision/filterHeight");
       grip::filterEntries[1] = ntinst.GetEntry("/vision/deviationThreshold");
 
       grip::FetchVisionNetworkTable();
 
+    std::cout << __LINE__ << std::endl;
       runner.RunForever();
     }).detach();
   }

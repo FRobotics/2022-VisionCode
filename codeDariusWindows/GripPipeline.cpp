@@ -25,6 +25,7 @@ void CorrectRect(cv::RotatedRect &rect) {
 // Updates interal values from NT table (runs every second)
 void FetchVisionNetworkTable() {
 	filterHeight = filterEntries[0].GetDouble(filterHeight);
+	
 	deviationThresh = filterEntries[1].GetDouble(deviationThresh);
 
 	hsvThresholdHue[0] = hsvThresholdEntries[0].GetDouble(hsvThresholdHue[0]); 
@@ -54,15 +55,23 @@ void UpdateVisionNetworkTable(double avgX, double avgY, double avgWidth, double 
 bool SortRect(cv::RotatedRect &a, cv::RotatedRect &b) {
 	return a.center.y < b.center.y;
 }
-void GripPipeline::Process(cv::Mat& source0){
+
+    void GripPipeline::Process(cv::Mat& source0){
+    //std::cout << "say what" << std::endl;
+	
+    ////std::cout << __LINE__ << std::endl;
 	try {
 	FetchVisionNetworkTable();
 	//Step HSV_Threshold0:
 	//input
 	cv::Mat hsvThresholdInput = source0;
+	if (filterHeight >= source0.rows) {
+		filterHeight = source0.rows/2;
+	}
 	hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, this->hsvThresholdOutput);
 	//Step Blur0:
-	//input
+	//inp
+    ////std::cout << __LINE__ << std::endl;
 	cv::Mat blurInput = hsvThresholdOutput;
 	BlurType blurType = BlurType::BOX;
 	double blurRadius = 3.6036036036036063;  // default Double
@@ -76,6 +85,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	double cvErodeIterations = 1;
 	int cvErodeBordertype = cv::BORDER_CONSTANT;
 	cv::Scalar cvErodeBordervalue(-1);
+    ////std::cout << __LINE__ << std::endl;
 	cv::erode(cvErodeSrc, cvErodeOutput, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue);	
 	cv::Mat cvThresholdSrc = cvErodeOutput;
 	double cvThresholdThresh = 30;
@@ -89,6 +99,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	findContours(findContoursInput, findContoursExternalOnly, this->findContoursOutput);
 	//Step Convex_Hulls0:
 	//input
+    ////std::cout << __LINE__ << std::endl;
 	std::vector<std::vector<cv::Point> > convexHullsContours = findContoursOutput;
 	convexHulls(convexHullsContours, this->convexHullsOutput);
 
@@ -99,11 +110,13 @@ void GripPipeline::Process(cv::Mat& source0){
 	
 
 	std::vector<cv::RotatedRect> rotatedRectangles;
-	
+
+    ////std::cout << __LINE__ << std::endl;	
 	for (unsigned int i = 0 ; i < convexHullsContours.size() ; i++) {
 		rotatedRectangles.push_back(cv::minAreaRect(convexHullsContours[i]));
 		CorrectRect(rotatedRectangles[i]);
 	}
+    ////std::cout << __LINE__ << std::endl;
 	sort(rotatedRectangles.begin(), rotatedRectangles.end(), SortRect);
 	/*if (watchdog % 100*20 == 0) {
 		// Write debug image files
@@ -118,12 +131,14 @@ void GripPipeline::Process(cv::Mat& source0){
 			cv::rectangle(rotatedRectImage, cv::Point(r.center.x - r.size.width/2, r.center.y - r.size.height/2), cv::Point(r.center.x + r.size.width/2, r.center.y + r.size.height/2), cv::Scalar(0, 255, 0));
 		cv::imwrite("/home/pi/DebugImages/rotatedRectImage_" + suffix, rotatedRectImage);
 	}*/
+    ////std::cout << __LINE__ << std::endl;
 	if (rotatedRectangles.size() == 0) {
 		watchdog++;
 		return;
 	}
 
 	int height = blurInput.rows;
+
 	std::vector<int> prefixSum;
 	for (int i = 0 ; i < height ; i++) {
 		prefixSum.push_back(0);	
@@ -131,11 +146,13 @@ void GripPipeline::Process(cv::Mat& source0){
 	for (auto &r : rotatedRectangles) {
 		prefixSum[r.center.y]++;
 	}
+    ////std::cout << __LINE__ << std::endl;
 	int prefix = 0;
 	for (int i = 0 ; i < height ; i++) {
 		prefix += prefixSum[i];	
 		prefixSum[i] = prefix;
 	}
+    ////std::cout << __LINE__ << std::endl;
 	int max = 0;
 	int maxIndex = 0;
 	int intervalWidth = 0;
@@ -148,17 +165,35 @@ void GripPipeline::Process(cv::Mat& source0){
 		}else if (intervalSum == max)
 			intervalWidth++;
 	}
+//
+//
+//
+//
+//
+//
+//
+
+    //std::cout << "say what" << std::endl;
+    ////std::cout << __LINE__ << std::endl;
+    //std::cout << "say what" << std::endl;
+    //std::cout << "maxIndex: " << maxIndex << std::endl;
+    //std::cout << "hit it!" << std::endl;
+    //std::cout << "filterHeight: " << filterHeight << std::endl;
+    //std::cout << "rotatedRectangles.size(): " << rotatedRectangles.size() << std::endl << std::flush;
 	int targetY = maxIndex - (intervalWidth/2);
 	int lowerBound = prefixSum[maxIndex - filterHeight];
 	int upperBound = prefixSum[maxIndex] - prefixSum[maxIndex - filterHeight];
-	// trim vector
+	//std::cout << "lowerBound: " << lowerBound << std::endl;
+    //std::cout << "upperBound: " << upperBound << std::endl << std::flush;
+    // trim vector
 	rotatedRectangles.erase(rotatedRectangles.begin(), rotatedRectangles.begin() + lowerBound);
 	rotatedRectangles.erase(rotatedRectangles.begin() + upperBound + 1, rotatedRectangles.end() + 1);
 
 
+    ////std::cout << __LINE__ << std::endl;
 	/*if (watchdog % 100*20 == 0) {
 		cv::Mat rotatedRectImage = source0.clone();
-		std::cout << "Size: " << rotatedRectangles.size();
+		//std::cout << "Size: " << rotatedRectangles.size();
 		for (auto &r : rotatedRectangles)
 			cv::rectangle(rotatedRectImage, cv::Point(r.center.x - r.size.width/2, r.center.y - r.size.height/2), cv::Point(r.center.x + r.size.width/2, r.center.y + r.size.height/2), cv::Scalar(0, 255, 0));
 		cv::imwrite("/home/pi/DebugImages/filteredRotatedRectImage_" + suffix, rotatedRectImage);
@@ -168,6 +203,7 @@ void GripPipeline::Process(cv::Mat& source0){
 		watchdog++;
 		return;
 	}
+    ////std::cout << __LINE__ << std::endl;
 	double avgWidth = 0;
 	double avgHeight = 0;
 	for (auto &r : rotatedRectangles) {
@@ -177,6 +213,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	avgWidth /= (double)rotatedRectangles.size();
 	avgHeight /= (double)rotatedRectangles.size();
 
+    ////std::cout << __LINE__ << std::endl;
 	std::vector<cv::RotatedRect> stripes;
 	for (auto &r : rotatedRectangles) {
 		double widthDiff = pow(avgWidth - r.size.width, 2);
@@ -186,8 +223,10 @@ void GripPipeline::Process(cv::Mat& source0){
 			stripes.push_back(r);
 	}
 
+    ////std::cout << __LINE__ << std::endl;
 	double avgX = 0.0;
 	double avgY = 0.0;
+    ////std::cout << __LINE__ << std::endl;
 
 	for (auto &r : stripes) {
 		avgX += r.center.x;
@@ -196,6 +235,7 @@ void GripPipeline::Process(cv::Mat& source0){
 
 	cv::RotatedRect highest;
 
+    ////std::cout << __LINE__ << std::endl;
 	if (stripes.size() > 0) {
 		avgX /= (double)stripes.size();
 		avgY /= (double)stripes.size();
@@ -208,10 +248,12 @@ void GripPipeline::Process(cv::Mat& source0){
 	}
 
 
+    ////std::cout << __LINE__ << std::endl;
 
-	//std::cout << "Highest: " << highest.center.y << std::endl;
-	//std::cout << "Lowest: " << lowest.center.y << std::endl;
+	////std::cout << "Highest: " << highest.center.y << std::endl;
+	////std::cout << "Lowest: " << lowest.center.y << std::endl;
 
+    ////std::cout << __LINE__ << std::endl;
 	
 
 	/*if (watchdog % 100*20 == 0) {
@@ -222,13 +264,18 @@ void GripPipeline::Process(cv::Mat& source0){
 		cv::imwrite("/home/pi/DebugImages/stipesImage_" + suffix, stripesImage);
 	}*/
 
+    ////std::cout << __LINE__ << std::endl;
 
 	UpdateVisionNetworkTable(avgX, avgY, avgWidth, avgHeight, stripes.size(), source0.rows/2 - highest.center.y , avgX - source0.cols/2);
-	} /** end of try */
+
+    ////std::cout << __LINE__ << std::endl;	
+} /** end of try */
 	catch (int trappedErrorCode){
+    ////std::cout << __LINE__ << std::endl;
 		wpi::errs() << "Pipeline process trapped error" << trappedErrorCode << "\n";
 	}
 	catch(...) {
+    ////std::cout << __LINE__ << std::endl;
 		wpi::errs() << "Pipeline process trapped error - unknown \n";
 	}
 }
